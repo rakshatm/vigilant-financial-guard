@@ -138,7 +138,7 @@ const ModelExplorer = () => {
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="fpr" label={{ value: "False Positive Rate", position: "insideBottom", offset: -5 }} />
                         <YAxis label={{ value: "True Positive Rate", angle: -90, position: "insideLeft" }} />
-                        <Tooltip formatter={(value) => value.toFixed(2)} />
+                        <Tooltip formatter={(value: number) => value.toFixed(2)} />
                         <Line type="monotone" dataKey="tpr" stroke="#8884d8" strokeWidth={2} />
                         <Line type="monotone" dataKey="fpr" stroke="#82ca9d" strokeWidth={2} strokeDasharray="5 5" />
                       </LineChart>
@@ -164,7 +164,7 @@ const ModelExplorer = () => {
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="version" />
                         <YAxis domain={[0.75, 1]} />
-                        <Tooltip formatter={(value) => `${(value * 100).toFixed(1)}%`} />
+                        <Tooltip formatter={(value: number) => `${(value * 100).toFixed(1)}%`} />
                         <Legend />
                         <Line type="monotone" dataKey="accuracy" stroke="#8884d8" name="Accuracy" />
                         <Line type="monotone" dataKey="recall" stroke="#82ca9d" name="Recall" />
@@ -194,7 +194,7 @@ const ModelExplorer = () => {
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis type="number" domain={[0, 0.3]} />
                         <YAxis dataKey="name" type="category" scale="band" />
-                        <Tooltip formatter={(value) => `${(value * 100).toFixed(1)}%`} />
+                        <Tooltip formatter={(value: number) => `${(value * 100).toFixed(1)}%`} />
                         <Bar dataKey="value" fill="#8884d8" name="Importance">
                           {featureImportance.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -273,7 +273,7 @@ const ModelExplorer = () => {
                             <Cell fill="#4CAF50" />
                             <Cell fill="#F44336" />
                           </Pie>
-                          <Tooltip formatter={(value) => `${value}%`} />
+                          <Tooltip formatter={(value: number) => `${value}%`} />
                         </PieChart>
                       </ResponsiveContainer>
                     </div>
