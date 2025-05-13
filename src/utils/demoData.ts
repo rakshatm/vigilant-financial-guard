@@ -116,13 +116,13 @@ export const mockTransactions: TransactionType[] = [
 ];
 
 export const fraudFactors = [
-  { factor: "Unusual Location", impact: "High", description: "Transaction occurred in a location different from customer's regular pattern" },
-  { factor: "Odd Hour", impact: "Medium", description: "Transaction was made during unusual hours for this customer" },
-  { factor: "Amount Anomaly", impact: "High", description: "Transaction amount significantly higher than customer's typical spending" },
-  { factor: "Multiple Attempts", impact: "Medium", description: "Multiple transactions in short succession" },
-  { factor: "New Device", impact: "Medium", description: "Transaction from a device not previously used by this customer" },
-  { factor: "High-Risk Merchant", impact: "Low", description: "Merchant category associated with higher fraud rates" },
-  { factor: "Balance Ratio", impact: "Medium", description: "Transaction amount high relative to account balance" },
+  { factor: "Unusual Location", impact: "High", description: "Transaction occurred in a location different from customer's regular pattern", value: 35 },
+  { factor: "Odd Hour", impact: "Medium", description: "Transaction was made during unusual hours for this customer", value: 25 },
+  { factor: "Amount Anomaly", impact: "High", description: "Transaction amount significantly higher than customer's typical spending", value: 30 },
+  { factor: "Multiple Attempts", impact: "Medium", description: "Multiple transactions in short succession", value: 22 },
+  { factor: "New Device", impact: "Medium", description: "Transaction from a device not previously used by this customer", value: 20 },
+  { factor: "High-Risk Merchant", impact: "Low", description: "Merchant category associated with higher fraud rates", value: 15 },
+  { factor: "Balance Ratio", impact: "Medium", description: "Transaction amount high relative to account balance", value: 18 },
 ];
 
 export const fraudMetrics = {

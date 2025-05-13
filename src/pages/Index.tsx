@@ -1,10 +1,9 @@
-
 import React, { useState } from "react";
 import Header from "@/components/Header";
 import StatCards from "@/components/Dashboard/StatCards";
 import TransactionList from "@/components/Dashboard/TransactionList";
 import FraudChart from "@/components/Dashboard/FraudChart";
-import FraudIndicators from "@/components/Dashboard/FraudIndicators";
+import FraudIndicators, { FraudFactorType } from "@/components/Dashboard/FraudIndicators";
 import TransactionAnalyzer from "@/components/TransactionAnalyzer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -67,7 +66,7 @@ const Index = () => {
                 <FraudChart data={weeklyFraudData} />
               </div>
               
-              <FraudIndicators factors={fraudFactors} />
+              <FraudIndicators factors={fraudFactors as FraudFactorType[]} />
             </div>
             
             <div className="flex flex-col sm:flex-row items-center justify-between mb-4">

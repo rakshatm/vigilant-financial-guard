@@ -12,11 +12,11 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-interface FraudFactorType {
+export interface FraudFactorType {
   factor: string;
   description: string;
   impact: "High" | "Medium" | "Low";
-  value: number;
+  value?: number; // Make value optional
 }
 
 interface FraudIndicatorsProps {
@@ -26,11 +26,21 @@ interface FraudIndicatorsProps {
 const FraudIndicators: React.FC<FraudIndicatorsProps> = ({ factors }) => {
   const COLORS = ["#FF5252", "#FF7043", "#FFCA28", "#66BB6A", "#42A5F5"];
   
-  // Transform data for pie chart
+  // Transform data for pie chart and add default values if missing
   const pieData = factors.slice(0, 5).map((factor, index) => ({
     name: factor.factor,
-    value: factor.value,
+    value: factor.value || getDefaultValue(factor.impact), // Use value if exists or calculate based on impact
   }));
+  
+  // Helper function to get default values based on impact
+  const getDefaultValue = (impact: string) => {
+    switch (impact) {
+      case "High": return 30;
+      case "Medium": return 20;
+      case "Low": return 10;
+      default: return 5;
+    }
+  };
   
   const getImpactColor = (impact: string) => {
     switch (impact) {
@@ -96,7 +106,7 @@ const FraudIndicators: React.FC<FraudIndicatorsProps> = ({ factors }) => {
                     fill="#8884d8"
                     paddingAngle={5}
                     dataKey="value"
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
                     labelLine={false}
                   >
                     {pieData.map((entry, index) => (

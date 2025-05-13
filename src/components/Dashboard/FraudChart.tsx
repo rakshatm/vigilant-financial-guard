@@ -36,6 +36,123 @@ const FraudChart: React.FC<FraudChartProps> = ({ data }) => {
     totalTransactions: item.fraudCount + item.legitCount
   }));
   
+  // Render the appropriate chart based on the selected type
+  const renderChart = () => {
+    switch (chartType) {
+      case 'bar':
+        return (
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={data}
+              margin={{
+                top: 20,
+                right: 30,
+                left: 20,
+                bottom: 5,
+              }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <Legend />
+              <Bar 
+                dataKey="legitCount" 
+                name="Legitimate" 
+                stackId="a" 
+                fill="var(--color-legitimate)" 
+              />
+              <Bar 
+                dataKey="fraudCount" 
+                name="Fraudulent" 
+                stackId="a" 
+                fill="var(--color-fraudulent)" 
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        );
+      
+      case 'line':
+        return (
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart
+              data={percentageData}
+              margin={{
+                top: 20,
+                right: 30,
+                left: 20,
+                bottom: 5,
+              }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis yAxisId="left" orientation="left" />
+              <YAxis yAxisId="right" orientation="right" />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <Legend />
+              <Line 
+                yAxisId="left"
+                type="monotone" 
+                dataKey="fraudPercent" 
+                name="Fraud %" 
+                stroke="var(--color-fraudPercent)" 
+                activeDot={{ r: 8 }}
+              />
+              <Line 
+                yAxisId="right"
+                type="monotone" 
+                dataKey="totalTransactions" 
+                name="Total Transactions" 
+                stroke="var(--color-totalTransactions)" 
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        );
+      
+      case 'area':
+        return (
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart
+              data={data}
+              margin={{
+                top: 20,
+                right: 30,
+                left: 20,
+                bottom: 5,
+              }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <Legend />
+              <Area 
+                type="monotone" 
+                dataKey="legitCount" 
+                name="Legitimate" 
+                stackId="1" 
+                stroke="var(--color-legitimate)" 
+                fill="var(--color-legitimate)" 
+                fillOpacity={0.6}
+              />
+              <Area 
+                type="monotone" 
+                dataKey="fraudCount" 
+                name="Fraudulent" 
+                stackId="1" 
+                stroke="var(--color-fraudulent)" 
+                fill="var(--color-fraudulent)" 
+                fillOpacity={0.6}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        );
+      
+      default:
+        return null;
+    }
+  };
+  
   return (
     <Card className="w-full">
       <CardHeader className="flex flex-row items-start justify-between">
@@ -73,111 +190,7 @@ const FraudChart: React.FC<FraudChartProps> = ({ data }) => {
               }
             }}
           >
-            {chartType === 'bar' && (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={data}
-                  margin={{
-                    top: 20,
-                    right: 30,
-                    left: 20,
-                    bottom: 5,
-                  }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Legend />
-                  <Bar 
-                    dataKey="legitCount" 
-                    name="Legitimate" 
-                    stackId="a" 
-                    fill="var(--color-legitimate)" 
-                  />
-                  <Bar 
-                    dataKey="fraudCount" 
-                    name="Fraudulent" 
-                    stackId="a" 
-                    fill="var(--color-fraudulent)" 
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-            
-            {chartType === 'line' && (
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart
-                  data={percentageData}
-                  margin={{
-                    top: 20,
-                    right: 30,
-                    left: 20,
-                    bottom: 5,
-                  }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis yAxisId="left" orientation="left" />
-                  <YAxis yAxisId="right" orientation="right" />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Legend />
-                  <Line 
-                    yAxisId="left"
-                    type="monotone" 
-                    dataKey="fraudPercent" 
-                    name="Fraud %" 
-                    stroke="var(--color-fraudPercent)" 
-                    activeDot={{ r: 8 }}
-                  />
-                  <Line 
-                    yAxisId="right"
-                    type="monotone" 
-                    dataKey="totalTransactions" 
-                    name="Total Transactions" 
-                    stroke="var(--color-totalTransactions)" 
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            )}
-            
-            {chartType === 'area' && (
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={data}
-                  margin={{
-                    top: 20,
-                    right: 30,
-                    left: 20,
-                    bottom: 5,
-                  }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Legend />
-                  <Area 
-                    type="monotone" 
-                    dataKey="legitCount" 
-                    name="Legitimate" 
-                    stackId="1" 
-                    stroke="var(--color-legitimate)" 
-                    fill="var(--color-legitimate)" 
-                    fillOpacity={0.6}
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="fraudCount" 
-                    name="Fraudulent" 
-                    stackId="1" 
-                    stroke="var(--color-fraudulent)" 
-                    fill="var(--color-fraudulent)" 
-                    fillOpacity={0.6}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            )}
+            {renderChart()}
           </ChartContainer>
         </div>
       </CardContent>
