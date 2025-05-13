@@ -24,8 +24,9 @@ const Anomalies = () => {
           <p className="text-gray-500 dark:text-gray-400">AI-powered detection of suspicious patterns</p>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6 mb-8">
-          <Card className="lg:col-span-2">
+        {/* Restructured layout - Transaction Analysis moved to full width at the top */}
+        <div className="mb-8">
+          <Card>
             <CardHeader>
               <CardTitle>Anomaly Frequency</CardTitle>
               <CardDescription>Weekly pattern of detected anomalies</CardDescription>
@@ -34,7 +35,10 @@ const Anomalies = () => {
               <FraudChart data={weeklyFraudData} />
             </CardContent>
           </Card>
+        </div>
 
+        {/* Two column layout for the secondary content */}
+        <div className="grid lg:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
               <CardTitle>Recent Alerts</CardTitle>
@@ -74,33 +78,33 @@ const Anomalies = () => {
               </div>
             </CardContent>
           </Card>
-        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Top Anomaly Patterns</CardTitle>
-            <CardDescription>Most common fraud indicators detected by the system</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-2 gap-4">
-              {fraudFactors.map((factor, i) => (
-                <div key={i} className="flex items-start border rounded-lg p-4">
-                  <span className={`inline-block w-2 h-2 mt-1.5 mr-2 rounded-full ${
-                    factor.impact === "High" 
-                      ? "bg-finance-danger" 
-                      : factor.impact === "Medium" 
-                      ? "bg-finance-warning" 
-                      : "bg-finance-info"
-                  }`} />
-                  <div>
-                    <p className="font-medium">{factor.factor}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{factor.description}</p>
+          <Card>
+            <CardHeader>
+              <CardTitle>Top Anomaly Patterns</CardTitle>
+              <CardDescription>Most common fraud indicators detected by the system</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-1 gap-4">
+                {fraudFactors.slice(0, 4).map((factor, i) => (
+                  <div key={i} className="flex items-start border rounded-lg p-4">
+                    <span className={`inline-block w-2 h-2 mt-1.5 mr-2 rounded-full ${
+                      factor.impact === "High" 
+                        ? "bg-finance-danger" 
+                        : factor.impact === "Medium" 
+                        ? "bg-finance-warning" 
+                        : "bg-finance-info"
+                    }`} />
+                    <div>
+                      <p className="font-medium">{factor.factor}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{factor.description}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </main>
     </div>
   );
