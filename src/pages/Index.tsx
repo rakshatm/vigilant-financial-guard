@@ -1,15 +1,29 @@
 
-import React from "react";
+import React, { useState } from "react";
 import Header from "@/components/Header";
 import StatCards from "@/components/Dashboard/StatCards";
 import TransactionList from "@/components/Dashboard/TransactionList";
 import FraudChart from "@/components/Dashboard/FraudChart";
+import FraudIndicators from "@/components/Dashboard/FraudIndicators";
 import TransactionAnalyzer from "@/components/TransactionAnalyzer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ArrowRight, Calendar, Clock, RefreshCw } from "lucide-react";
 import { mockTransactions, fraudMetrics, weeklyFraudData, fraudFactors } from "@/utils/demoData";
+import { Badge } from "@/components/ui/badge";
 
 const Index = () => {
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    // Simulate data refresh
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 1500);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header />
@@ -19,9 +33,26 @@ const Index = () => {
             <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Fraud Detection Dashboard</h1>
             <p className="text-gray-500 dark:text-gray-400">Real-time transaction monitoring and ML-powered analysis</p>
           </div>
-          <div className="flex items-center space-x-2 mt-4 lg:mt-0">
-            <span className="text-sm">Last updated: May 13, 2025, 10:45 AM</span>
+          <div className="flex items-center space-x-4 mt-4 lg:mt-0">
+            <div className="flex items-center text-sm text-muted-foreground">
+              <Clock className="h-4 w-4 mr-1" />
+              <span>Last updated: May 13, 2025, 10:45 AM</span>
+            </div>
+            <Button 
+              size="sm" 
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="flex items-center gap-1"
+            >
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span>{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
+            </Button>
           </div>
+        </div>
+
+        <div className="mb-8">
+          <Badge className="bg-finance-accent text-white mb-2">Dashboard Overview</Badge>
+          <StatCards metrics={fraudMetrics} />
         </div>
 
         <Tabs defaultValue="dashboard" className="w-full">
@@ -30,42 +61,24 @@ const Index = () => {
             <TabsTrigger value="analyzer">Transaction Analyzer</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="dashboard" className="space-y-8">
-            <StatCards metrics={fraudMetrics} />
-            
+          <TabsContent value="dashboard" className="space-y-8">            
             <div className="grid lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
                 <FraudChart data={weeklyFraudData} />
               </div>
               
-              <Card>
-                <CardHeader>
-                  <CardTitle>Top Fraud Indicators</CardTitle>
-                  <CardDescription>Most common patterns in fraudulent transactions</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-4">
-                    {fraudFactors.slice(0, 5).map((factor, i) => (
-                      <li key={i} className="flex items-start">
-                        <span className={`inline-block w-2 h-2 mt-1.5 mr-2 rounded-full ${
-                          factor.impact === "High" 
-                            ? "bg-finance-danger" 
-                            : factor.impact === "Medium" 
-                            ? "bg-finance-warning" 
-                            : "bg-finance-info"
-                        }`} />
-                        <div>
-                          <p className="font-medium">{factor.factor}</p>
-                          <p className="text-xs text-muted-foreground">{factor.description}</p>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
+              <FraudIndicators factors={fraudFactors} />
             </div>
             
-            <TransactionList transactions={mockTransactions} />
+            <div className="flex flex-col sm:flex-row items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold">Recent Transactions</h2>
+              <Button variant="ghost" className="text-sm flex items-center">
+                <span>View All Transactions</span>
+                <ArrowRight className="ml-1 h-4 w-4" />
+              </Button>
+            </div>
+            
+            <TransactionList transactions={mockTransactions.slice(0, 5)} />
           </TabsContent>
           
           <TabsContent value="analyzer">
