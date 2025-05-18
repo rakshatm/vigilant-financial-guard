@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Bell, ShieldCheck } from "lucide-react";
+import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -9,20 +9,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Link } from "react-router-dom";
 
 const Header = () => {
   const isMobile = useIsMobile();
   
   return (
-    <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 py-3 px-4 sm:px-6 lg:px-8">
-      <div className="container mx-auto flex justify-between items-center">
-        <div className="flex items-center">
-          <Link to="/" className="flex items-center">
-            <ShieldCheck className="h-8 w-8 text-finance-primary mr-2" />
-            <h1 className="text-xl font-bold text-finance-primary">FraudGuard ML</h1>
-          </Link>
-        </div>
+    <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 py-3 px-4 fixed top-0 right-0 left-0 md:left-16 z-10 transition-all duration-300">
+      <div className="container mx-auto flex justify-end items-center">
         <div className="flex items-center space-x-4">
           <TooltipProvider>
             <Tooltip>

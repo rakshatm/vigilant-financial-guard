@@ -2,23 +2,31 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { 
-  BarChart, 
   LayoutDashboard, 
+  Activity, 
   Settings, 
   TrendingUp, 
-  Activity, 
-  Menu, 
-  ChevronLeft
+  BarChart
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { 
+  Sidebar as ShadcnSidebar,
+  SidebarContent,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  useSidebar,
+  SidebarTrigger
+} from "@/components/ui/sidebar";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { ShieldCheck } from "lucide-react";
 
 const Sidebar = () => {
-  const [isExpanded, setIsExpanded] = React.useState(true);
-  const isMobile = useIsMobile();
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = React.useState(false);
   const location = useLocation();
+  const isMobile = useIsMobile();
+  const { open } = useSidebar();
   
   const navItems = [
     { name: "Dashboard", path: "/", icon: <LayoutDashboard className="h-5 w-5" /> },
@@ -28,134 +36,49 @@ const Sidebar = () => {
     { name: "Model", path: "/model", icon: <BarChart className="h-5 w-5" /> },
     { name: "Settings", path: "/settings", icon: <Settings className="h-5 w-5" /> },
   ];
-  
-  const toggleSidebar = () => {
-    setIsExpanded(!isExpanded);
-  };
-  
-  const toggleMobileSidebar = () => {
-    setIsMobileSidebarOpen(!isMobileSidebarOpen);
-  };
-  
-  // Desktop sidebar
-  const desktopSidebar = (
-    <div className={cn(
-      "hidden md:flex flex-col h-screen bg-gray-900 text-white transition-all duration-300 fixed z-10",
-      isExpanded ? "w-64" : "w-16"
-    )}>
-      <div className="flex items-center justify-between p-4">
-        {isExpanded && <span className="text-lg font-bold">FraudGuard ML</span>}
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={toggleSidebar} 
-          className="text-white hover:bg-gray-800"
-        >
-          <ChevronLeft className={cn("h-5 w-5 transition-transform", !isExpanded && "rotate-180")} />
-        </Button>
-      </div>
-      
-      <div className="flex-1 py-4">
-        <nav>
-          <ul className="space-y-2 px-2">
-            {navItems.map((item) => (
-              <li key={item.name}>
-                <Link
-                  to={item.path}
-                  className={cn(
-                    "flex items-center px-4 py-2 rounded-md transition-colors",
-                    location.pathname === item.path 
-                      ? "bg-gray-800 text-white" 
-                      : "text-gray-300 hover:bg-gray-800 hover:text-white"
-                  )}
-                >
-                  <span className="mr-3">{item.icon}</span>
-                  {isExpanded && <span>{item.name}</span>}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </div>
-    </div>
-  );
-  
-  // Mobile sidebar toggle button
-  const mobileMenuButton = (
-    <div className="md:hidden fixed bottom-4 right-4 z-50">
-      <Button 
-        onClick={toggleMobileSidebar} 
-        className="rounded-full w-12 h-12 flex items-center justify-center bg-gray-900 text-white shadow-lg"
-      >
-        <Menu className="h-6 w-6" />
-      </Button>
-    </div>
-  );
-  
-  // Mobile sidebar
-  const mobileSidebar = (
-    <div className={cn(
-      "md:hidden fixed inset-y-0 left-0 w-64 bg-gray-900 text-white transform transition-transform z-40",
-      isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
-    )}>
-      <div className="p-4 border-b border-gray-800">
-        <div className="flex items-center justify-between">
-          <span className="text-lg font-bold">FraudGuard ML</span>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={toggleMobileSidebar} 
-            className="text-white hover:bg-gray-800"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </Button>
+
+  return (
+    <ShadcnSidebar
+      className="border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+      variant="sidebar"
+      collapsible="icon"
+    >
+      <div className="flex items-center h-16 px-4 border-b border-gray-200 dark:border-gray-700">
+        {open && (
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="h-6 w-6 text-finance-primary" />
+            <span className="font-bold text-lg text-finance-primary">FraudGuard ML</span>
+          </div>
+        )}
+        <div className="ml-auto">
+          <SidebarTrigger />
         </div>
       </div>
-      
-      <div className="py-4">
-        <nav>
-          <ul className="space-y-2 px-2">
+
+      <SidebarContent>
+        <ScrollArea className="h-[calc(100vh-4rem)]">
+          <SidebarMenu>
             {navItems.map((item) => (
-              <li key={item.name}>
-                <Link
-                  to={item.path}
-                  className={cn(
-                    "flex items-center px-4 py-2 rounded-md transition-colors",
-                    location.pathname === item.path 
-                      ? "bg-gray-800 text-white" 
-                      : "text-gray-300 hover:bg-gray-800 hover:text-white"
-                  )}
-                  onClick={() => setIsMobileSidebarOpen(false)}
+              <SidebarMenuItem key={item.name}>
+                <SidebarMenuButton
+                  tooltip={item.name}
+                  asChild
+                  isActive={location.pathname === item.path}
                 >
-                  <span className="mr-3">{item.icon}</span>
-                  <span>{item.name}</span>
-                </Link>
-              </li>
+                  <Link to={item.path} className={cn(
+                    "flex items-center gap-3",
+                    location.pathname === item.path ? "font-medium" : ""
+                  )}>
+                    {item.icon}
+                    <span>{item.name}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             ))}
-          </ul>
-        </nav>
-      </div>
-    </div>
-  );
-  
-  // Overlay for mobile sidebar
-  const mobileOverlay = (
-    <div 
-      className={cn(
-        "md:hidden fixed inset-0 bg-black bg-opacity-50 z-30 transition-opacity",
-        isMobileSidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-      )}
-      onClick={() => setIsMobileSidebarOpen(false)}
-    />
-  );
-  
-  return (
-    <>
-      {desktopSidebar}
-      {mobileSidebar}
-      {mobileOverlay}
-      {mobileMenuButton}
-    </>
+          </SidebarMenu>
+        </ScrollArea>
+      </SidebarContent>
+    </ShadcnSidebar>
   );
 };
 
