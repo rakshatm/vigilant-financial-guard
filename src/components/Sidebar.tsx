@@ -6,7 +6,8 @@ import {
   Activity, 
   Settings, 
   TrendingUp, 
-  BarChart
+  BarChart,
+  ShieldCheck
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -20,8 +21,6 @@ import {
   SidebarTrigger
 } from "@/components/ui/sidebar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
-import { ShieldCheck } from "lucide-react";
 
 const Sidebar = () => {
   const location = useLocation();
