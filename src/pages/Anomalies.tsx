@@ -1,6 +1,5 @@
 
 import React from "react";
-import Header from "@/components/Header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import FraudChart from "@/components/Dashboard/FraudChart";
 import { weeklyFraudData, fraudFactors } from "@/utils/demoData";
@@ -17,25 +16,24 @@ const Anomalies = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Header />
-      <main className="container mx-auto px-4 py-6">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Anomaly Detection</h1>
-          <p className="text-gray-500 dark:text-gray-400">AI-powered detection of suspicious patterns</p>
-        </div>
+    <div>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Anomaly Detection</h1>
+        <p className="text-gray-500 dark:text-gray-400">AI-powered detection of suspicious patterns</p>
+      </div>
 
-        <div className="grid lg:grid-cols-3 gap-6 mb-8">
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle>Anomaly Frequency</CardTitle>
-              <CardDescription>Weekly pattern of detected anomalies</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <FraudChart data={weeklyFraudData} />
-            </CardContent>
-          </Card>
+      <div className="grid gap-6 mb-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>Anomaly Frequency</CardTitle>
+            <CardDescription>Weekly pattern of detected anomalies</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <FraudChart data={weeklyFraudData} />
+          </CardContent>
+        </Card>
 
+        <div className="grid lg:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
               <CardTitle>Recent Alerts</CardTitle>
@@ -75,34 +73,34 @@ const Anomalies = () => {
               </div>
             </CardContent>
           </Card>
-        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Top Anomaly Patterns</CardTitle>
-            <CardDescription>Most common fraud indicators detected by the system</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-2 gap-4">
-              {fraudFactors.map((factor, i) => (
-                <div key={i} className="flex items-start border rounded-lg p-4">
-                  <span className={`inline-block w-2 h-2 mt-1.5 mr-2 rounded-full ${
-                    factor.impact === "High" 
-                      ? "bg-finance-danger" 
-                      : factor.impact === "Medium" 
-                      ? "bg-finance-warning" 
-                      : "bg-finance-info"
-                  }`} />
-                  <div>
-                    <p className="font-medium">{factor.factor}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{factor.description}</p>
+          <Card>
+            <CardHeader>
+              <CardTitle>Top Anomaly Patterns</CardTitle>
+              <CardDescription>Most common fraud indicators detected by the system</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4">
+                {fraudFactors.map((factor, i) => (
+                  <div key={i} className="flex items-start border rounded-lg p-4">
+                    <span className={`inline-block w-2 h-2 mt-1.5 mr-2 rounded-full ${
+                      factor.impact === "High" 
+                        ? "bg-finance-danger" 
+                        : factor.impact === "Medium" 
+                        ? "bg-finance-warning" 
+                        : "bg-finance-info"
+                    }`} />
+                    <div>
+                      <p className="font-medium">{factor.factor}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{factor.description}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </main>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 };
