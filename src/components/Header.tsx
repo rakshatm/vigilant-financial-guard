@@ -14,8 +14,8 @@ const Header = () => {
   const isMobile = useIsMobile();
   
   return (
-    <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 py-3 px-4 fixed top-0 right-0 left-0 md:left-16 z-10 transition-all duration-300">
-      <div className="container mx-auto flex justify-end items-center">
+    <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 py-3 px-4 z-10">
+      <div className="flex justify-end items-center">
         <div className="flex items-center space-x-4">
           <TooltipProvider>
             <Tooltip>

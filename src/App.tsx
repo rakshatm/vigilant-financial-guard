@@ -24,23 +24,21 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <SidebarProvider defaultOpen={true}>
-          <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900">
-            <Header />
-            <div className="flex flex-1 overflow-hidden">
-              <Sidebar />
-              <main className="flex-1 overflow-auto pt-16 md:pt-0 transition-all duration-300">
-                <div className="container mx-auto px-4 py-6">
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                    <Route path="/transactions" element={<Transactions />} />
-                    <Route path="/anomalies" element={<Anomalies />} />
-                    <Route path="/trends" element={<Trends />} />
-                    <Route path="/model" element={<ModelExplorer />} />
-                    <Route path="/settings" element={<Settings />} />
-                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </div>
+          <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+            <Sidebar />
+            <div className="flex flex-col flex-1 overflow-hidden">
+              <Header />
+              <main className="flex-1 overflow-auto p-4 md:p-6">
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/transactions" element={<Transactions />} />
+                  <Route path="/anomalies" element={<Anomalies />} />
+                  <Route path="/trends" element={<Trends />} />
+                  <Route path="/model" element={<ModelExplorer />} />
+                  <Route path="/settings" element={<Settings />} />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
               </main>
             </div>
           </div>
