@@ -36,6 +36,13 @@ const FraudChart: React.FC<FraudChartProps> = ({ data }) => {
     totalTransactions: item.fraudCount + item.legitCount
   }));
   
+  // Find the maximum value in the dataset to properly scale the Y-axis
+  const maxFraudValue = Math.max(...data.map(item => item.fraudCount));
+  const maxLegitValue = Math.max(...data.map(item => item.legitCount));
+  const maxValue = Math.max(maxFraudValue, maxLegitValue);
+  // Add 15% padding to ensure bars don't touch the top boundary
+  const yAxisDomain = [0, Math.ceil(maxValue * 1.15)];
+  
   // Render the appropriate chart based on the selected type
   const renderChart = () => {
     switch (chartType) {
@@ -53,7 +60,7 @@ const FraudChart: React.FC<FraudChartProps> = ({ data }) => {
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
-              <YAxis />
+              <YAxis domain={yAxisDomain} />
               <ChartTooltip content={<ChartTooltipContent />} />
               <Legend />
               <Bar 
@@ -123,7 +130,7 @@ const FraudChart: React.FC<FraudChartProps> = ({ data }) => {
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
-              <YAxis />
+              <YAxis domain={yAxisDomain} />
               <ChartTooltip content={<ChartTooltipContent />} />
               <Legend />
               <Area 
