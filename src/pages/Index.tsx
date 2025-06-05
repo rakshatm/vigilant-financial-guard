@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import StatCards from "@/components/Dashboard/StatCards";
 import TransactionList from "@/components/Dashboard/TransactionList";
@@ -6,22 +7,43 @@ import FraudChart from "@/components/Dashboard/FraudChart";
 import FraudIndicators, { FraudFactorType } from "@/components/Dashboard/FraudIndicators";
 import TransactionAnalyzer from "@/components/TransactionAnalyzer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Calendar, Clock, RefreshCw } from "lucide-react";
-import { mockTransactions, fraudMetrics, weeklyFraudData, fraudFactors } from "@/utils/demoData";
+import { ArrowRight, Clock, RefreshCw, Database } from "lucide-react";
+import { fraudFactors } from "@/utils/demoData";
 import { Badge } from "@/components/ui/badge";
+import { useApiData } from "@/hooks/useApiData";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Index = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [transactions, setTransactions] = useState([]);
+  const [metrics, setMetrics] = useState(null);
+  const [weeklyData, setWeeklyData] = useState([]);
+  
+  const { useRealApi, isLoading, error, getTransactions, getMetrics, getWeeklyData } = useApiData();
 
-  const handleRefresh = () => {
+  const loadData = async () => {
     setIsRefreshing(true);
-    // Simulate data refresh
-    setTimeout(() => {
+    try {
+      const [transactionData, metricsData, weeklyChartData] = await Promise.all([
+        getTransactions(),
+        getMetrics(),
+        getWeeklyData()
+      ]);
+      
+      setTransactions(transactionData);
+      setMetrics(metricsData);
+      setWeeklyData(weeklyChartData);
+    } catch (err) {
+      console.error('Failed to load data:', err);
+    } finally {
       setIsRefreshing(false);
-    }, 1500);
+    }
   };
+
+  useEffect(() => {
+    loadData();
+  }, [useRealApi]);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -37,9 +59,15 @@ const Index = () => {
               <Clock className="h-4 w-4 mr-1" />
               <span>Last updated: May 13, 2025, 10:45 AM</span>
             </div>
+            <div className="flex items-center text-sm">
+              <Database className="h-4 w-4 mr-1" />
+              <Badge variant={useRealApi ? "default" : "secondary"}>
+                {useRealApi ? "Live API" : "Demo Data"}
+              </Badge>
+            </div>
             <Button 
               size="sm" 
-              onClick={handleRefresh}
+              onClick={loadData}
               disabled={isRefreshing}
               className="flex items-center gap-1"
             >
@@ -49,9 +77,17 @@ const Index = () => {
           </div>
         </div>
 
+        {error && (
+          <Alert className="mb-6">
+            <AlertDescription>
+              API connection failed: {error}. Showing demo data instead.
+            </AlertDescription>
+          </Alert>
+        )}
+
         <div className="mb-8">
           <Badge className="bg-finance-accent text-white mb-2">Dashboard Overview</Badge>
-          <StatCards metrics={fraudMetrics} />
+          {metrics && <StatCards metrics={metrics} />}
         </div>
 
         <Tabs defaultValue="dashboard" className="w-full">
@@ -63,7 +99,7 @@ const Index = () => {
           <TabsContent value="dashboard" className="space-y-8">            
             <div className="grid lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
-                <FraudChart data={weeklyFraudData} />
+                {weeklyData.length > 0 && <FraudChart data={weeklyData} />}
               </div>
               
               <FraudIndicators factors={fraudFactors as FraudFactorType[]} />
@@ -77,7 +113,9 @@ const Index = () => {
               </Button>
             </div>
             
-            <TransactionList transactions={mockTransactions.slice(0, 5)} />
+            {transactions.length > 0 && (
+              <TransactionList transactions={transactions.slice(0, 5)} />
+            )}
           </TabsContent>
           
           <TabsContent value="analyzer">

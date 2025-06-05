@@ -1,6 +1,6 @@
-
 import React from "react";
 import Header from "@/components/Header";
+import DatabaseConfig from "@/components/DatabaseConfig";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +26,7 @@ const Settings = () => {
             <TabsTrigger value="general">General</TabsTrigger>
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
             <TabsTrigger value="model">Model Settings</TabsTrigger>
+            <TabsTrigger value="database">Database</TabsTrigger>
             <TabsTrigger value="api">API & Integrations</TabsTrigger>
           </TabsList>
 
@@ -221,6 +222,10 @@ const Settings = () => {
                 </Button>
               </CardFooter>
             </Card>
+          </TabsContent>
+          
+          <TabsContent value="database">
+            <DatabaseConfig />
           </TabsContent>
           
           <TabsContent value="api">
