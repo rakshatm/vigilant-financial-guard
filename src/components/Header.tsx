@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { Bell, Menu, ShieldCheck } from "lucide-react";
+import { Bell, Menu, ShieldCheck, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -8,6 +8,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Link } from "react-router-dom";
 import {
@@ -17,10 +23,12 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
+import { useAuth } from "@/hooks/useAuth";
 
 const Header = () => {
   const isMobile = useIsMobile();
   const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
+  const { username, logout } = useAuth();
   
   return (
     <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 py-3 px-4 sm:px-6 lg:px-8">
@@ -85,14 +93,25 @@ const Header = () => {
               <TooltipContent>You have new alerts</TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          <div className="flex items-center">
-            <div className="h-8 w-8 rounded-full bg-finance-primary flex items-center justify-center text-white">
-              <span className="text-sm font-medium">JD</span>
-            </div>
-            {!isMobile && (
-              <span className="ml-2 text-sm font-medium">John Doe</span>
-            )}
-          </div>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="flex items-center space-x-2">
+                <div className="h-8 w-8 rounded-full bg-finance-primary flex items-center justify-center text-white">
+                  <span className="text-sm font-medium">{username?.charAt(0).toUpperCase() || 'U'}</span>
+                </div>
+                {!isMobile && (
+                  <span className="text-sm font-medium">{username || 'User'}</span>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={logout} className="text-red-600">
+                <LogOut className="mr-2 h-4 w-4" />
+                Logout
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
       

@@ -11,6 +11,8 @@ import Anomalies from "./pages/Anomalies";
 import Trends from "./pages/Trends";
 import ModelExplorer from "./pages/ModelExplorer";
 import Settings from "./pages/Settings";
+import Login from "./pages/Login";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -21,13 +23,13 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/transactions" element={<Transactions />} />
-          <Route path="/anomalies" element={<Anomalies />} />
-          <Route path="/trends" element={<Trends />} />
-          <Route path="/model" element={<ModelExplorer />} />
-          <Route path="/settings" element={<Settings />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+          <Route path="/transactions" element={<ProtectedRoute><Transactions /></ProtectedRoute>} />
+          <Route path="/anomalies" element={<ProtectedRoute><Anomalies /></ProtectedRoute>} />
+          <Route path="/trends" element={<ProtectedRoute><Trends /></ProtectedRoute>} />
+          <Route path="/model" element={<ProtectedRoute><ModelExplorer /></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
