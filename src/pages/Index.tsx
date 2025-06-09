@@ -19,8 +19,22 @@ const Index = () => {
   const [transactions, setTransactions] = useState([]);
   const [metrics, setMetrics] = useState(null);
   const [weeklyData, setWeeklyData] = useState([]);
+  const [lastUpdated, setLastUpdated] = useState("");
   
   const { useRealApi, isLoading, error, getTransactions, getMetrics, getWeeklyData } = useApiData();
+
+  const updateTimestamp = () => {
+    const now = new Date();
+    const formatted = now.toLocaleString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+    setLastUpdated(formatted);
+  };
 
   const loadData = async () => {
     setIsRefreshing(true);
@@ -34,6 +48,7 @@ const Index = () => {
       setTransactions(transactionData);
       setMetrics(metricsData);
       setWeeklyData(weeklyChartData);
+      updateTimestamp();
     } catch (err) {
       console.error('Failed to load data:', err);
     } finally {
@@ -42,6 +57,7 @@ const Index = () => {
   };
 
   useEffect(() => {
+    updateTimestamp();
     loadData();
   }, [useRealApi]);
 
@@ -57,7 +73,7 @@ const Index = () => {
           <div className="flex items-center space-x-4 mt-4 lg:mt-0">
             <div className="flex items-center text-sm text-muted-foreground">
               <Clock className="h-4 w-4 mr-1" />
-              <span>Last updated: May 13, 2025, 10:45 AM</span>
+              <span>Last updated: {lastUpdated}</span>
             </div>
             <div className="flex items-center text-sm">
               <Database className="h-4 w-4 mr-1" />
