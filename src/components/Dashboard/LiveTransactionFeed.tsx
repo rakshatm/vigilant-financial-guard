@@ -9,9 +9,13 @@ import {
   Clock, 
   Pause, 
   Play, 
-  XCircle 
+  XCircle,
+  AlertTriangle,
+  Shield
 } from "lucide-react";
 import { TransactionType } from "@/utils/demoData";
+import { predictFraud, getRiskLevel, TransactionInput } from "@/utils/modelHelpers";
+import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 interface LiveTransactionFeedProps {
@@ -27,14 +31,78 @@ const LiveTransactionFeed: React.FC<LiveTransactionFeedProps> = ({
   const [isLive, setIsLive] = useState(true);
   const [newTransactionIds, setNewTransactionIds] = useState<Set<string>>(new Set());
   const intervalRef = useRef<NodeJS.Timeout>();
+  const { toast } = useToast();
+
+  // Analyze transaction for fraud and trigger alerts
+  const analyzeTransactionForFraud = (transaction: TransactionType): TransactionType => {
+    // Map transaction to model input format
+    const modelInput: TransactionInput = {
+      transaction_amount: transaction.amount,
+      account_balance: transaction.accountBalance,
+      transaction_type: transaction.type.toLowerCase(),
+      merchant_category: transaction.merchantCategory.toLowerCase(),
+      transaction_hour: new Date().getHours(),
+      device_type: transaction.device?.toLowerCase() || 'unknown',
+      day_of_week: new Date().getDay(),
+      state: 'unknown',
+      city: 'unknown',
+      location: transaction.location || 'Same City',
+      currency: transaction.currency
+    };
+
+    // Get fraud prediction
+    const fraudAnalysis = predictFraud(modelInput);
+    const riskLevel = getRiskLevel(fraudAnalysis.fraudProbability);
+
+    // Update transaction with analyzed risk data
+    const analyzedTransaction = {
+      ...transaction,
+      risk: riskLevel,
+      fraudProbability: fraudAnalysis.fraudProbability
+    };
+
+    // Trigger alerts for suspicious transactions
+    if (fraudAnalysis.fraudProbability >= 0.7) {
+      // Critical fraud alert with sound
+      try {
+        // Create audio alert for critical transactions
+        const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DEsGURCkGUye7fgDEIJn/L5+OWORA');
+        audio.volume = 0.3;
+        audio.play().catch(() => {}); // Ignore if audio fails
+      } catch (e) {
+        // Ignore audio errors
+      }
+      
+      toast({
+        title: "🚨 Critical Fraud Alert",
+        description: `Transaction ${transaction.id} flagged with ${(fraudAnalysis.fraudProbability * 100).toFixed(1)}% fraud probability`,
+        variant: "destructive"
+      });
+    } else if (fraudAnalysis.fraudProbability >= 0.5) {
+      // High risk alert
+      toast({
+        title: "⚠️ High Risk Transaction",
+        description: `Transaction ${transaction.id} requires verification - ${(fraudAnalysis.fraudProbability * 100).toFixed(1)}% risk`,
+        variant: "default"
+      });
+    } else if (fraudAnalysis.fraudProbability >= 0.3) {
+      // Medium risk notification
+      toast({
+        title: "🔍 Suspicious Activity",
+        description: `Transaction ${transaction.id} shows medium risk patterns`,
+        variant: "default"
+      });
+    }
+
+    return analyzedTransaction;
+  };
 
   // Generate a random transaction
   const generateRandomTransaction = (): TransactionType => {
-    const amounts = [150, 275, 89, 450, 1200, 75, 890, 325, 2100, 67];
+    const amounts = [150, 275, 89, 450, 1200, 75, 890, 325, 2100, 67, 5000, 15000];
     const types = ["Online", "Card", "Wire Transfer", "ATM"];
-    const merchants = ["Amazon", "Starbucks", "Shell Gas", "Target", "Best Buy", "McDonald's"];
-    const currencies = ["USD", "EUR", "GBP"];
-    const risks = ["High", "Medium", "Low"] as const;
+    const merchants = ["Amazon", "Starbucks", "Shell Gas", "Target", "Best Buy", "McDonald's", "Crypto Exchange", "Gambling Site"];
+    const currencies = ["USD", "EUR", "GBP", "BTC"];
     const statuses = ["Approved", "Rejected", "Pending"] as const;
     const devices = ["Mobile", "Desktop", "Tablet", "ATM"];
     const locations = ["Same City", "Different State", "International", "Unusual Location"];
@@ -43,7 +111,7 @@ const LiveTransactionFeed: React.FC<LiveTransactionFeedProps> = ({
     const id = `TXN${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
     const amount = amounts[Math.floor(Math.random() * amounts.length)];
     
-    return {
+    const baseTransaction = {
       id,
       date: now.toLocaleDateString(),
       time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -55,10 +123,13 @@ const LiveTransactionFeed: React.FC<LiveTransactionFeedProps> = ({
       location: locations[Math.floor(Math.random() * locations.length)],
       accountBalance: Math.floor(Math.random() * 10000) + amount,
       status: statuses[Math.floor(Math.random() * statuses.length)],
-      risk: risks[Math.floor(Math.random() * risks.length)],
-      fraudProbability: Math.random(),
+      risk: "Low" as const, // Will be updated by fraud analysis
+      fraudProbability: 0, // Will be updated by fraud analysis
       customerName: `Customer ${Math.floor(Math.random() * 1000)}`
     };
+
+    // Analyze the transaction for fraud and get real risk assessment
+    return analyzeTransactionForFraud(baseTransaction);
   };
 
   // Add new transaction with animation
