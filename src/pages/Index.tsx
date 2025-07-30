@@ -5,6 +5,7 @@ import StatCards from "@/components/Dashboard/StatCards";
 import TransactionList from "@/components/Dashboard/TransactionList";
 import FraudChart from "@/components/Dashboard/FraudChart";
 import FraudIndicators, { FraudFactorType } from "@/components/Dashboard/FraudIndicators";
+import LiveTransactionFeed from "@/components/Dashboard/LiveTransactionFeed";
 import TransactionAnalyzer from "@/components/TransactionAnalyzer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -129,9 +130,16 @@ const Index = () => {
               </Button>
             </div>
             
-            {transactions.length > 0 && (
-              <TransactionList transactions={transactions.slice(0, 5)} />
-            )}
+            <div className="grid lg:grid-cols-2 gap-6">
+              <div>
+                {transactions.length > 0 && (
+                  <TransactionList transactions={transactions.slice(0, 5)} />
+                )}
+              </div>
+              <div>
+                <LiveTransactionFeed initialTransactions={transactions} />
+              </div>
+            </div>
           </TabsContent>
           
           <TabsContent value="analyzer">
