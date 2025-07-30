@@ -6,6 +6,7 @@ import TransactionList from "@/components/Dashboard/TransactionList";
 import FraudChart from "@/components/Dashboard/FraudChart";
 import FraudIndicators, { FraudFactorType } from "@/components/Dashboard/FraudIndicators";
 import LiveTransactionFeed from "@/components/Dashboard/LiveTransactionFeed";
+import FraudAlertSystem from "@/components/Dashboard/FraudAlertSystem";
 import TransactionAnalyzer from "@/components/TransactionAnalyzer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -128,6 +129,10 @@ const Index = () => {
                 <span>View All Transactions</span>
                 <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
+            </div>
+            
+            <div className="mb-8">
+              <FraudAlertSystem />
             </div>
             
             <div className="grid lg:grid-cols-2 gap-6">
