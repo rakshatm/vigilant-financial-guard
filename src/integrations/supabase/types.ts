@@ -14,7 +14,213 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      customer_approvals: {
+        Row: {
+          approval_method: string
+          expires_at: string
+          id: string
+          phone_number: string | null
+          responded_at: string | null
+          sent_at: string
+          status: string
+          transaction_id: string
+          user_id: string
+          verification_code: string
+        }
+        Insert: {
+          approval_method: string
+          expires_at?: string
+          id?: string
+          phone_number?: string | null
+          responded_at?: string | null
+          sent_at?: string
+          status?: string
+          transaction_id: string
+          user_id: string
+          verification_code: string
+        }
+        Update: {
+          approval_method?: string
+          expires_at?: string
+          id?: string
+          phone_number?: string | null
+          responded_at?: string | null
+          sent_at?: string
+          status?: string
+          transaction_id?: string
+          user_id?: string
+          verification_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_approvals_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fraud_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string
+          id: string
+          message: string
+          resolved_at: string | null
+          severity: string
+          status: string
+          transaction_id: string
+        }
+        Insert: {
+          alert_type: string
+          created_at?: string
+          id?: string
+          message: string
+          resolved_at?: string | null
+          severity: string
+          status?: string
+          transaction_id: string
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string
+          id?: string
+          message?: string
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          transaction_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fraud_alerts_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      model_training_data: {
+        Row: {
+          created_at: string
+          features: Json
+          id: string
+          label: boolean
+          model_version: string
+          transaction_id: string
+        }
+        Insert: {
+          created_at?: string
+          features: Json
+          id?: string
+          label: boolean
+          model_version?: string
+          transaction_id: string
+        }
+        Update: {
+          created_at?: string
+          features?: Json
+          id?: string
+          label?: boolean
+          model_version?: string
+          transaction_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "model_training_data_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          email: string | null
+          id: string
+          notification_preferences: Json | null
+          phone_number: string | null
+          risk_profile: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          notification_preferences?: Json | null
+          phone_number?: string | null
+          risk_profile?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          notification_preferences?: Json | null
+          phone_number?: string | null
+          risk_profile?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string
+          fraud_score: number | null
+          id: string
+          location: string | null
+          merchant: string
+          risk_level: string | null
+          status: string
+          timestamp: string
+          transaction_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          category: string
+          created_at?: string
+          fraud_score?: number | null
+          id?: string
+          location?: string | null
+          merchant: string
+          risk_level?: string | null
+          status?: string
+          timestamp?: string
+          transaction_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string
+          fraud_score?: number | null
+          id?: string
+          location?: string | null
+          merchant?: string
+          risk_level?: string | null
+          status?: string
+          timestamp?: string
+          transaction_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
