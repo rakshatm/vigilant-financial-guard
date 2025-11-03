@@ -13,17 +13,19 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Clock, RefreshCw, Database } from "lucide-react";
 import { fraudFactors } from "@/utils/demoData";
 import { Badge } from "@/components/ui/badge";
-import { useApiData } from "@/hooks/useApiData";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useFraudData } from "@/hooks/useFraudData";
+import { adaptTransactions } from "@/utils/transactionAdapter";
 
 const Index = () => {
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [transactions, setTransactions] = useState([]);
-  const [metrics, setMetrics] = useState(null);
-  const [weeklyData, setWeeklyData] = useState([]);
   const [lastUpdated, setLastUpdated] = useState("");
-  
-  const { useRealApi, isLoading, error, getTransactions, getMetrics, getWeeklyData } = useApiData();
+  const { transactions, metrics, loading, error, refreshData } = useFraudData();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Convert Supabase transactions to UI format
+  const adaptedTransactions = React.useMemo(() => {
+    return adaptTransactions(transactions);
+  }, [transactions]);
 
   const updateTimestamp = () => {
     const now = new Date();
@@ -38,30 +40,41 @@ const Index = () => {
     setLastUpdated(formatted);
   };
 
-  const loadData = async () => {
+  const handleRefresh = async () => {
     setIsRefreshing(true);
-    try {
-      const [transactionData, metricsData, weeklyChartData] = await Promise.all([
-        getTransactions(),
-        getMetrics(),
-        getWeeklyData()
-      ]);
-      
-      setTransactions(transactionData);
-      setMetrics(metricsData);
-      setWeeklyData(weeklyChartData);
-      updateTimestamp();
-    } catch (err) {
-      console.error('Failed to load data:', err);
-    } finally {
-      setIsRefreshing(false);
-    }
+    await refreshData();
+    updateTimestamp();
+    setIsRefreshing(false);
   };
 
   useEffect(() => {
     updateTimestamp();
-    loadData();
-  }, [useRealApi]);
+  }, []);
+
+  // Calculate weekly data from transactions for the chart
+  const weeklyData = React.useMemo(() => {
+    if (!transactions.length) return [];
+    
+    // Group transactions by day
+    const dayMap = new Map();
+    transactions.forEach(t => {
+      const day = new Date(t.timestamp).toLocaleDateString('en-US', { weekday: 'short' });
+      if (!dayMap.has(day)) {
+        dayMap.set(day, { legitimate: 0, fraudulent: 0 });
+      }
+      const data = dayMap.get(day);
+      if (t.status === 'blocked' || t.status === 'flagged') {
+        data.fraudulent++;
+      } else {
+        data.legitimate++;
+      }
+    });
+
+    return Array.from(dayMap.entries()).map(([day, data]) => ({
+      day,
+      ...data
+    }));
+  }, [transactions]);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -79,18 +92,18 @@ const Index = () => {
             </div>
             <div className="flex items-center text-sm">
               <Database className="h-4 w-4 mr-1" />
-              <Badge variant={useRealApi ? "default" : "secondary"}>
-                {useRealApi ? "Live API" : "Demo Data"}
+              <Badge variant="default">
+                Live Data
               </Badge>
             </div>
             <Button 
               size="sm" 
-              onClick={loadData}
-              disabled={isRefreshing}
+              onClick={handleRefresh}
+              disabled={isRefreshing || loading}
               className="flex items-center gap-1"
             >
-              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              <span>{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
+              <RefreshCw className={`h-4 w-4 ${(isRefreshing || loading) ? 'animate-spin' : ''}`} />
+              <span>{(isRefreshing || loading) ? 'Refreshing...' : 'Refresh'}</span>
             </Button>
           </div>
         </div>
@@ -98,7 +111,7 @@ const Index = () => {
         {error && (
           <Alert className="mb-6">
             <AlertDescription>
-              API connection failed: {error}. Showing demo data instead.
+              Error loading data: {error}
             </AlertDescription>
           </Alert>
         )}
@@ -137,12 +150,12 @@ const Index = () => {
             
             <div className="grid lg:grid-cols-2 gap-6">
               <div>
-                {transactions.length > 0 && (
-                  <TransactionList transactions={transactions.slice(0, 5)} />
+                {adaptedTransactions.length > 0 && (
+                  <TransactionList transactions={adaptedTransactions.slice(0, 5)} />
                 )}
               </div>
               <div>
-                <LiveTransactionFeed initialTransactions={transactions} />
+                <LiveTransactionFeed initialTransactions={adaptedTransactions} />
               </div>
             </div>
           </TabsContent>

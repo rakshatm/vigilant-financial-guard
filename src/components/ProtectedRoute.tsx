@@ -1,6 +1,6 @@
-
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -8,18 +8,24 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const navigate = useNavigate();
+  const { user, loading } = useSupabaseAuth();
 
   useEffect(() => {
-    const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-    if (!isAuthenticated) {
+    if (!loading && !user) {
       navigate('/login');
     }
-  }, [navigate]);
+  }, [user, loading, navigate]);
 
-  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
   
-  if (!isAuthenticated) {
-    return null; // or a loading spinner
+  if (!user) {
+    return null;
   }
 
   return <>{children}</>;
