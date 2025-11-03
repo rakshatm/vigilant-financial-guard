@@ -16,15 +16,25 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useFraudData } from "@/hooks/useFraudData";
 import { adaptTransactions } from "@/utils/transactionAdapter";
+import { mockTransactions, fraudMetrics } from "@/utils/demoData";
 
 const Index = () => {
   const [lastUpdated, setLastUpdated] = useState("");
-  const { transactions, metrics, loading, error, refreshData } = useFraudData();
+  const { transactions: supabaseTransactions, metrics: supabaseMetrics, loading, error, refreshData } = useFraudData();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Convert Supabase transactions to UI format
+  // Use Supabase data if available, otherwise fall back to demo data
+  const transactions = supabaseTransactions.length > 0 ? supabaseTransactions : [];
+  const metrics = supabaseMetrics || fraudMetrics;
+
+  // Convert Supabase transactions to UI format, with demo data as fallback
   const adaptedTransactions = React.useMemo(() => {
-    return adaptTransactions(transactions);
+    // If we have Supabase transactions, adapt them
+    if (transactions.length > 0) {
+      return adaptTransactions(transactions);
+    }
+    // Otherwise use demo data which is already in the correct format
+    return mockTransactions;
   }, [transactions]);
 
   const updateTimestamp = () => {
