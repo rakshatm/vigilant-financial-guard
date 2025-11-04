@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useFraudData } from "@/hooks/useFraudData";
 import { adaptTransactions } from "@/utils/transactionAdapter";
-import { mockTransactions, fraudMetrics } from "@/utils/demoData";
+import { mockTransactions, fraudMetrics, weeklyFraudData } from "@/utils/demoData";
 
 const Index = () => {
   const [lastUpdated, setLastUpdated] = useState("");
@@ -61,29 +61,28 @@ const Index = () => {
     updateTimestamp();
   }, []);
 
-  // Calculate weekly data from transactions for the chart
+  // Calculate weekly data from adapted transactions for the chart
   const weeklyData = React.useMemo(() => {
-    if (!transactions.length) return [];
+    // If we have Supabase transactions, calculate from them
+    if (transactions.length > 0) {
+      const dayMap = new Map();
+      transactions.forEach(t => {
+        const day = new Date(t.timestamp).toLocaleDateString('en-US', { weekday: 'short' });
+        if (!dayMap.has(day)) {
+          dayMap.set(day, { name: day, fraudCount: 0, legitCount: 0 });
+        }
+        const data = dayMap.get(day);
+        if (t.status === 'blocked' || t.status === 'flagged') {
+          data.fraudCount++;
+        } else {
+          data.legitCount++;
+        }
+      });
+      return Array.from(dayMap.values());
+    }
     
-    // Group transactions by day
-    const dayMap = new Map();
-    transactions.forEach(t => {
-      const day = new Date(t.timestamp).toLocaleDateString('en-US', { weekday: 'short' });
-      if (!dayMap.has(day)) {
-        dayMap.set(day, { legitimate: 0, fraudulent: 0 });
-      }
-      const data = dayMap.get(day);
-      if (t.status === 'blocked' || t.status === 'flagged') {
-        data.fraudulent++;
-      } else {
-        data.legitimate++;
-      }
-    });
-
-    return Array.from(dayMap.entries()).map(([day, data]) => ({
-      day,
-      ...data
-    }));
+    // Otherwise use demo weekly data
+    return weeklyFraudData;
   }, [transactions]);
 
   return (
@@ -140,7 +139,7 @@ const Index = () => {
           <TabsContent value="dashboard" className="space-y-8">            
             <div className="grid lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
-                {weeklyData.length > 0 && <FraudChart data={weeklyData} />}
+                <FraudChart data={weeklyData} />
               </div>
               
               <FraudIndicators factors={fraudFactors as FraudFactorType[]} />
@@ -160,9 +159,7 @@ const Index = () => {
             
             <div className="grid lg:grid-cols-2 gap-6">
               <div>
-                {adaptedTransactions.length > 0 && (
-                  <TransactionList transactions={adaptedTransactions.slice(0, 5)} />
-                )}
+                <TransactionList transactions={adaptedTransactions.slice(0, 5)} />
               </div>
               <div>
                 <LiveTransactionFeed initialTransactions={adaptedTransactions} />
