@@ -18,6 +18,7 @@ import { useFraudData } from "@/hooks/useFraudData";
 import { adaptTransactions } from "@/utils/transactionAdapter";
 import { mockTransactions, fraudMetrics, weeklyFraudData } from "@/utils/demoData";
 import { DatasetImporter } from "@/components/Dashboard/DatasetImporter";
+import { SeedDataButton } from "@/components/Dashboard/SeedDataButton";
 
 const Index = () => {
   const [lastUpdated, setLastUpdated] = useState("");
@@ -122,10 +123,11 @@ const Index = () => {
             </div>
             <div className="flex items-center text-sm">
               <Database className="h-4 w-4 mr-1" />
-              <Badge variant="default">
-                Live Data
+              <Badge variant={transactions.length > 0 ? "default" : "secondary"}>
+                {transactions.length > 0 ? "Supabase Data" : "Demo Data"}
               </Badge>
             </div>
+            <SeedDataButton />
             <Button 
               size="sm" 
               onClick={handleRefresh}
