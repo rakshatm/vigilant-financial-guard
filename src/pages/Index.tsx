@@ -17,6 +17,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useFraudData } from "@/hooks/useFraudData";
 import { adaptTransactions } from "@/utils/transactionAdapter";
 import { mockTransactions, fraudMetrics, weeklyFraudData } from "@/utils/demoData";
+import { DatasetImporter } from "@/components/Dashboard/DatasetImporter";
 
 const Index = () => {
   const [lastUpdated, setLastUpdated] = useState("");
@@ -85,6 +86,26 @@ const Index = () => {
     return weeklyFraudData;
   }, [transactions]);
 
+  // Get balanced recent transactions (mix of fraud and legitimate)
+  const recentTransactions = React.useMemo(() => {
+    if (adaptedTransactions.length === 0) return [];
+    
+    // Separate fraud and legitimate transactions
+    const fraudTxns = adaptedTransactions.filter(t => t.status === 'Rejected' || t.risk === 'High');
+    const legitTxns = adaptedTransactions.filter(t => t.status === 'Approved' || t.risk === 'Low');
+    const pendingTxns = adaptedTransactions.filter(t => t.status === 'Pending');
+    
+    // Mix them: 2 fraud, 2 legitimate, 1 pending (or whatever is available)
+    const balanced = [
+      ...fraudTxns.slice(0, 2),
+      ...legitTxns.slice(0, 2),
+      ...pendingTxns.slice(0, 1)
+    ].slice(0, 5);
+    
+    // If we don't have enough, just take the first 5
+    return balanced.length > 0 ? balanced : adaptedTransactions.slice(0, 5);
+  }, [adaptedTransactions]);
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header />
@@ -136,7 +157,9 @@ const Index = () => {
             <TabsTrigger value="analyzer">Transaction Analyzer</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="dashboard" className="space-y-8">            
+          <TabsContent value="dashboard" className="space-y-8">
+            <DatasetImporter />
+            
             <div className="grid lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
                 <FraudChart data={weeklyData} />
@@ -159,7 +182,7 @@ const Index = () => {
             
             <div className="grid lg:grid-cols-2 gap-6">
               <div>
-                <TransactionList transactions={adaptedTransactions.slice(0, 5)} />
+                <TransactionList transactions={recentTransactions} />
               </div>
               <div>
                 <LiveTransactionFeed initialTransactions={adaptedTransactions} />
