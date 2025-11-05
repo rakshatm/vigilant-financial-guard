@@ -39,29 +39,30 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error('Invalid transactions data');
     }
 
-    // Process and insert transactions
-    const transactionsToInsert = transactions.map((t: any) => ({
-      user_id: user.id,
-      transaction_id: t.transaction_id || `TXN-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      amount: parseFloat(t.amount),
-      merchant: t.merchant,
-      category: t.category,
-      location: t.location || null,
-      status: t.status || 'pending',
-      fraud_score: parseFloat(t.fraud_score || 0),
-      risk_level: t.risk_level || 'low',
-      timestamp: t.timestamp || new Date().toISOString()
-    }));
-
-    // Insert in batches of 100
-    const batchSize = 100;
-    const results = [];
+    // Process in smaller batches to avoid memory issues
+    const batchSize = 50;
+    let totalImported = 0;
     
-    for (let i = 0; i < transactionsToInsert.length; i += batchSize) {
-      const batch = transactionsToInsert.slice(i, i + batchSize);
+    for (let i = 0; i < transactions.length; i += batchSize) {
+      const batch = transactions.slice(i, i + batchSize);
+      
+      // Transform batch only (don't transform everything at once)
+      const transactionsToInsert = batch.map((t: any) => ({
+        user_id: user.id,
+        transaction_id: t.transaction_id || `TXN-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        amount: parseFloat(t.amount),
+        merchant: t.merchant,
+        category: t.category,
+        location: t.location || null,
+        status: t.status || 'pending',
+        fraud_score: parseFloat(t.fraud_score || 0),
+        risk_level: t.risk_level || 'low',
+        timestamp: t.timestamp || new Date().toISOString()
+      }));
+
       const { data, error } = await supabase
         .from('transactions')
-        .insert(batch)
+        .insert(transactionsToInsert)
         .select();
 
       if (error) {
@@ -69,14 +70,15 @@ const handler = async (req: Request): Promise<Response> => {
         throw error;
       }
       
-      results.push(...(data || []));
+      totalImported += data?.length || 0;
+      console.log(`Processed batch ${Math.floor(i / batchSize) + 1}, imported ${data?.length || 0} transactions`);
     }
 
     return new Response(
       JSON.stringify({
         success: true,
-        imported: results.length,
-        message: `Successfully imported ${results.length} transactions`
+        imported: totalImported,
+        message: `Successfully imported ${totalImported} transactions`
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
