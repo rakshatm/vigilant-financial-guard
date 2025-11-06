@@ -54,17 +54,24 @@ const Settings = () => {
                 
                 <div className="grid gap-3">
                   <Label htmlFor="timezone">Timezone</Label>
-                  <Select defaultValue="america_los_angeles">
+                  <Select defaultValue="asia_kolkata">
                     <SelectTrigger>
                       <SelectValue placeholder="Select timezone" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="asia_kolkata">Asia/Kolkata (IST UTC+05:30)</SelectItem>
                       <SelectItem value="america_los_angeles">America/Los Angeles (UTC-07:00)</SelectItem>
                       <SelectItem value="america_new_york">America/New York (UTC-04:00)</SelectItem>
                       <SelectItem value="europe_london">Europe/London (UTC+01:00)</SelectItem>
                       <SelectItem value="asia_tokyo">Asia/Tokyo (UTC+09:00)</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+                
+                <div className="grid gap-3">
+                  <Label htmlFor="gmail">Gmail Address</Label>
+                  <Input id="gmail" type="email" placeholder="your.email@gmail.com" />
+                  <p className="text-xs text-muted-foreground">Used for sending alerts and notifications</p>
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between">

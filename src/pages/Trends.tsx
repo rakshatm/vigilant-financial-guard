@@ -9,68 +9,67 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Trends = () => {
-  // Sample data for charts
+  // Sample data for charts - Indian dataset
   const monthlyData = [
-    { name: "Jan", transactions: 420, frauds: 18 },
-    { name: "Feb", transactions: 380, frauds: 22 },
-    { name: "Mar", transactions: 450, frauds: 25 },
-    { name: "Apr", transactions: 520, frauds: 32 },
-    { name: "May", transactions: 480, frauds: 28 },
-    { name: "Jun", transactions: 550, frauds: 30 },
-    { name: "Jul", transactions: 590, frauds: 34 },
-    { name: "Aug", transactions: 610, frauds: 38 },
-    { name: "Sep", transactions: 560, frauds: 36 },
-    { name: "Oct", transactions: 590, frauds: 40 },
-    { name: "Nov", transactions: 640, frauds: 42 },
-    { name: "Dec", transactions: 710, frauds: 48 }
+    { name: "Jan", transactions: 20, frauds: 10 },
+    { name: "Feb", transactions: 0, frauds: 0 },
+    { name: "Mar", transactions: 0, frauds: 0 },
+    { name: "Apr", transactions: 0, frauds: 0 },
+    { name: "May", transactions: 0, frauds: 0 },
+    { name: "Jun", transactions: 0, frauds: 0 },
+    { name: "Jul", transactions: 0, frauds: 0 },
+    { name: "Aug", transactions: 0, frauds: 0 },
+    { name: "Sep", transactions: 0, frauds: 0 },
+    { name: "Oct", transactions: 0, frauds: 0 },
+    { name: "Nov", transactions: 0, frauds: 0 },
+    { name: "Dec", transactions: 0, frauds: 0 }
   ];
 
   const fraudCategoryData = [
-    { name: "Online", value: 42 },
-    { name: "In-Store", value: 28 },
-    { name: "ATM", value: 15 },
-    { name: "Mobile", value: 10 },
-    { name: "Other", value: 5 }
+    { name: "TRANSFER", value: 6 },
+    { name: "PAYMENT", value: 2 },
+    { name: "CASHOUT", value: 1 },
+    { name: "DEBIT", value: 1 },
   ];
 
   const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
 
   const timeOfDayData = [
-    { hour: "00", frauds: 15 },
-    { hour: "01", frauds: 18 },
-    { hour: "02", frauds: 22 },
-    { hour: "03", frauds: 28 },
-    { hour: "04", frauds: 25 },
-    { hour: "05", frauds: 20 },
-    { hour: "06", frauds: 15 },
-    { hour: "07", frauds: 10 },
-    { hour: "08", frauds: 8 },
-    { hour: "09", frauds: 12 },
-    { hour: "10", frauds: 15 },
-    { hour: "11", frauds: 18 },
-    { hour: "12", frauds: 20 },
-    { hour: "13", frauds: 22 },
-    { hour: "14", frauds: 24 },
-    { hour: "15", frauds: 28 },
-    { hour: "16", frauds: 30 },
-    { hour: "17", frauds: 34 },
-    { hour: "18", frauds: 38 },
-    { hour: "19", frauds: 42 },
-    { hour: "20", frauds: 45 },
-    { hour: "21", frauds: 48 },
-    { hour: "22", frauds: 40 },
-    { hour: "23", frauds: 30 }
+    { hour: "00", frauds: 0 },
+    { hour: "01", frauds: 0 },
+    { hour: "02", frauds: 0 },
+    { hour: "03", frauds: 0 },
+    { hour: "04", frauds: 0 },
+    { hour: "05", frauds: 0 },
+    { hour: "06", frauds: 0 },
+    { hour: "07", frauds: 0 },
+    { hour: "08", frauds: 0 },
+    { hour: "09", frauds: 0 },
+    { hour: "10", frauds: 1 },
+    { hour: "11", frauds: 1 },
+    { hour: "12", frauds: 0 },
+    { hour: "13", frauds: 2 },
+    { hour: "14", frauds: 1 },
+    { hour: "15", frauds: 0 },
+    { hour: "16", frauds: 2 },
+    { hour: "17", frauds: 1 },
+    { hour: "18", frauds: 0 },
+    { hour: "19", frauds: 0 },
+    { hour: "20", frauds: 2 },
+    { hour: "21", frauds: 0 },
+    { hour: "22", frauds: 0 },
+    { hour: "23", frauds: 0 }
   ];
 
   const volumeByRegionData = [
-    { state: "CA", volume: 380, frauds: 42 },
-    { state: "NY", volume: 320, frauds: 38 },
-    { state: "TX", volume: 280, frauds: 35 },
-    { state: "FL", volume: 240, frauds: 30 },
-    { state: "IL", volume: 200, frauds: 25 },
-    { state: "PA", volume: 180, frauds: 22 },
-    { state: "OH", volume: 160, frauds: 18 },
-    { state: "GA", volume: 140, frauds: 15 }
+    { state: "Maharashtra", volume: 3, frauds: 1 },
+    { state: "Gujarat", volume: 3, frauds: 1 },
+    { state: "Kerala", volume: 2, frauds: 0 },
+    { state: "Mizoram", volume: 2, frauds: 2 },
+    { state: "Karnataka", volume: 1, frauds: 0 },
+    { state: "Delhi", volume: 1, frauds: 0 },
+    { state: "Rajasthan", volume: 1, frauds: 1 },
+    { state: "West Bengal", volume: 1, frauds: 1 }
   ];
 
   return (
@@ -157,12 +156,11 @@ const Trends = () => {
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart
                         data={[
-                          { category: "Electronics", count: 42 },
-                          { category: "Travel", count: 38 },
-                          { category: "Gambling", count: 35 },
-                          { category: "Crypto", count: 32 },
-                          { category: "Retail", count: 25 },
-                          { category: "Dining", count: 20 }
+                          { category: "Restaurant", count: 4 },
+                          { category: "Groceries", count: 3 },
+                          { category: "Clothing", count: 3 },
+                          { category: "Entertainment", count: 0 },
+                          { category: "Utilities", count: 0 }
                         ]}
                       >
                         <CartesianGrid strokeDasharray="3 3" />
