@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import DatabaseConfig from "@/components/DatabaseConfig";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -10,8 +10,75 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Save, RefreshCw, AlertTriangle, Check } from "lucide-react";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Settings = () => {
+  const { user } = useSupabaseAuth();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  
+  // Form state
+  const [displayName, setDisplayName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [gmailAddress, setGmailAddress] = useState("");
+
+  // Load profile data
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!user) return;
+      
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (data) {
+        setDisplayName(data.display_name || '');
+        setEmail(data.email || user.email || '');
+        setPhoneNumber(data.phone_number || '');
+      } else if (user.email) {
+        setEmail(user.email);
+      }
+      setLoading(false);
+    };
+
+    loadProfile();
+  }, [user]);
+
+  const handleSaveProfile = async () => {
+    if (!user) return;
+    
+    setSaving(true);
+    const { error } = await supabase
+      .from('profiles')
+      .upsert({
+        user_id: user.id,
+        display_name: displayName,
+        email: email,
+        phone_number: phoneNumber,
+      });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save profile changes",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Success",
+        description: "Profile updated successfully",
+      });
+    }
+    setSaving(false);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header />
@@ -39,12 +106,38 @@ const Settings = () => {
               <CardContent className="space-y-6">
                 <div className="grid gap-3">
                   <Label htmlFor="name">Full Name</Label>
-                  <Input id="name" defaultValue="John Doe" />
+                  <Input 
+                    id="name" 
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    placeholder="Enter your full name"
+                    disabled={loading}
+                  />
                 </div>
                 
                 <div className="grid gap-3">
                   <Label htmlFor="email">Email Address</Label>
-                  <Input id="email" type="email" defaultValue="john.doe@example.com" />
+                  <Input 
+                    id="email" 
+                    type="email" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="your.email@example.com"
+                    disabled={loading}
+                  />
+                </div>
+
+                <div className="grid gap-3">
+                  <Label htmlFor="phone">Phone Number</Label>
+                  <Input 
+                    id="phone" 
+                    type="tel" 
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder="+91 98765 43210"
+                    disabled={loading}
+                  />
+                  <p className="text-xs text-muted-foreground">Indian format with country code</p>
                 </div>
                 
                 <div className="grid gap-3">
@@ -70,15 +163,31 @@ const Settings = () => {
                 
                 <div className="grid gap-3">
                   <Label htmlFor="gmail">Gmail Address</Label>
-                  <Input id="gmail" type="email" placeholder="your.email@gmail.com" />
+                  <Input 
+                    id="gmail" 
+                    type="email" 
+                    value={gmailAddress}
+                    onChange={(e) => setGmailAddress(e.target.value)}
+                    placeholder="your.email@gmail.com"
+                    disabled={loading}
+                  />
                   <p className="text-xs text-muted-foreground">Used for sending alerts and notifications</p>
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between">
-                <Button variant="outline">Cancel</Button>
-                <Button className="flex items-center gap-2">
+                <Button variant="outline" onClick={() => {
+                  setDisplayName("");
+                  setEmail(user?.email || "");
+                  setPhoneNumber("");
+                  setGmailAddress("");
+                }}>Cancel</Button>
+                <Button 
+                  className="flex items-center gap-2"
+                  onClick={handleSaveProfile}
+                  disabled={saving || loading}
+                >
                   <Save className="h-4 w-4" />
-                  <span>Save Changes</span>
+                  <span>{saving ? "Saving..." : "Save Changes"}</span>
                 </Button>
               </CardFooter>
             </Card>
