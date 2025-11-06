@@ -99,13 +99,13 @@ const LiveTransactionFeed: React.FC<LiveTransactionFeedProps> = ({
 
   // Generate a random transaction
   const generateRandomTransaction = (): TransactionType => {
-    const amounts = [150, 275, 89, 450, 1200, 75, 890, 325, 2100, 67, 5000, 15000];
-    const types = ["Online", "Card", "Wire Transfer", "ATM"];
-    const merchants = ["Amazon", "Starbucks", "Shell Gas", "Target", "Best Buy", "McDonald's", "Crypto Exchange", "Gambling Site"];
-    const currencies = ["USD", "EUR", "GBP", "BTC"];
+    const amounts = [15000, 27500, 8900, 45000, 120000, 7500, 89000, 32500, 210000, 6700, 500000, 1500000];
+    const types = ["TRANSFER", "DEBIT", "PAYMENT", "CASHOUT"];
+    const merchants = ["Flipkart", "Big Bazaar", "Reliance Fresh", "DMart", "Swiggy", "Zomato", "BookMyShow", "PayTM"];
+    const currencies = ["INR"];
     const statuses = ["Approved", "Rejected", "Pending"] as const;
-    const devices = ["Mobile", "Desktop", "Tablet", "ATM"];
-    const locations = ["Same City", "Different State", "International", "Unusual Location"];
+    const devices = ["Mobile", "Desktop", "Tablet", "ATM", "POS Terminal"];
+    const locations = ["Mumbai, Maharashtra", "Delhi, Delhi", "Bangalore, Karnataka", "Chennai, Tamil Nadu", "Kolkata, West Bengal", "Pune, Maharashtra", "Hyderabad, Telangana", "Ahmedabad, Gujarat"];
     
     const now = new Date();
     const id = `TXN${Math.random().toString(36).substr(2, 9).toUpperCase()}`;

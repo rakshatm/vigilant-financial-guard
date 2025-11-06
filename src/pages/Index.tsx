@@ -39,13 +39,14 @@ const Index = () => {
 
   const updateTimestamp = () => {
     const now = new Date();
-    const formatted = now.toLocaleString('en-US', {
+    const formatted = now.toLocaleString('en-IN', {
       month: 'long',
       day: 'numeric',
       year: 'numeric',
       hour: 'numeric',
       minute: '2-digit',
-      hour12: true
+      hour12: true,
+      timeZone: 'Asia/Kolkata'
     });
     setLastUpdated(formatted);
   };

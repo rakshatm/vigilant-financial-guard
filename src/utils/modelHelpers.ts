@@ -61,7 +61,7 @@ export const predictFraud = (input: TransactionInput): {
   }
 
   // Foreign currency
-  if (input.currency !== 'USD') {
+  if (input.currency !== 'INR') {
     baseProbability += 0.05;
     factors.push({ factor: "Foreign currency", impact: 0.05 });
   }

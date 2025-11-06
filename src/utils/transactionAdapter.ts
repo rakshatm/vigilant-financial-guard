@@ -25,10 +25,10 @@ export const adaptTransaction = (transaction: Transaction): TransactionType => {
 
   return {
     id: transaction.transaction_id,
-    date: date.toLocaleDateString(),
-    time: date.toLocaleTimeString(),
+    date: date.toLocaleDateString('en-IN'),
+    time: date.toLocaleTimeString('en-IN'),
     amount: Number(transaction.amount),
-    currency: 'USD',
+    currency: 'INR',
     type: transaction.category,
     merchantCategory: transaction.merchant,
     status: statusMap[transaction.status],

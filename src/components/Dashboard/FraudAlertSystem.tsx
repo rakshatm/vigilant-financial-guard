@@ -63,8 +63,8 @@ const FraudAlertSystem: React.FC = () => {
       amount: Math.floor(Math.random() * 10000) + 100,
       timestamp: new Date(),
       status: statuses[Math.floor(Math.random() * statuses.length)],
-      location: ['New York, NY', 'London, UK', 'Tokyo, JP', 'Sydney, AU'][Math.floor(Math.random() * 4)],
-      merchantName: ['Amazon', 'PayPal', 'Stripe', 'Apple Store'][Math.floor(Math.random() * 4)]
+      location: ['Mumbai, Maharashtra', 'Delhi, Delhi', 'Bangalore, Karnataka', 'Chennai, Tamil Nadu'][Math.floor(Math.random() * 4)],
+      merchantName: ['Flipkart', 'Paytm', 'PhonePe', 'Amazon India'][Math.floor(Math.random() * 4)]
     };
   };
 

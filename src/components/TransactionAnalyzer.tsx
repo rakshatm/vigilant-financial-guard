@@ -26,7 +26,7 @@ const locations = [
 ];
 
 const currencies = [
-  "USD", "EUR", "GBP", "CAD", "AUD", "JPY"
+  "INR"
 ];
 
 const deviceTypes = [
@@ -48,10 +48,10 @@ const TransactionAnalyzer: React.FC = () => {
     transaction_hour: new Date().getHours(),
     device_type: "Mobile",
     day_of_week: new Date().getDay(),
-    state: "California",
-    city: "San Francisco",
-    location: "Different State",
-    currency: "USD"
+    state: "Maharashtra",
+    city: "Mumbai",
+    location: "Same City",
+    currency: "INR"
   });
 
   const handleInputChange = (field: keyof TransactionInput, value: string | number) => {

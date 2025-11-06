@@ -100,7 +100,7 @@ const StatCards: React.FC<StatCardsProps> = ({ metrics }) => {
               <div className="text-sm text-muted-foreground">transactions</div>
             </div>
             <div className="mt-1">
-              <p className="text-xs text-muted-foreground">Average amount: ${metrics.avgFraudAmount.toLocaleString()}</p>
+              <p className="text-xs text-muted-foreground">Average amount: ₹{metrics.avgFraudAmount.toLocaleString('en-IN')}</p>
             </div>
             <div className="mt-4 flex justify-end">
               <Button 
@@ -123,7 +123,7 @@ const StatCards: React.FC<StatCardsProps> = ({ metrics }) => {
           </CardHeader>
           <CardContent>
             <div className="flex items-baseline justify-between">
-              <div className="text-3xl font-bold">${metrics.savingsFromPrevention.toLocaleString()}</div>
+              <div className="text-3xl font-bold">₹{metrics.savingsFromPrevention.toLocaleString('en-IN')}</div>
               <div className="text-sm text-muted-foreground">saved</div>
             </div>
             <div className="mt-1">
