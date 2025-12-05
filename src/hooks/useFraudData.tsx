@@ -62,23 +62,14 @@ export const useFraudData = () => {
     }
   };
 
-  // Fetch fraud alerts
+  // Fetch fraud alerts - using fraud_alert table (note: table has minimal structure)
   const fetchAlerts = async () => {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
-        .from('fraud_alerts')
-        .select(`
-          *,
-          transactions!inner(user_id)
-        `)
-        .eq('transactions.user_id', user.id)
-        .eq('status', 'active')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setAlerts((data || []) as FraudAlert[]);
+      // The fraud_alert table only has id and created_at columns
+      // For now, we'll return an empty array as alerts are generated in the FraudAlertSystem component
+      setAlerts([]);
     } catch (err) {
       console.error('Error fetching alerts:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch alerts');
