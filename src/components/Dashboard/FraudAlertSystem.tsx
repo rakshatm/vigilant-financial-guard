@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertTriangle, Shield, DollarSign, Clock, X, CheckCircle } from 'lucide-react';
+import { AlertTriangle, Shield, IndianRupee, Clock, X, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export interface FraudAlert {
@@ -63,8 +63,8 @@ const FraudAlertSystem: React.FC = () => {
       amount: Math.floor(Math.random() * 10000) + 100,
       timestamp: new Date(),
       status: statuses[Math.floor(Math.random() * statuses.length)],
-      location: ['Mumbai, Maharashtra', 'Delhi, Delhi', 'Bangalore, Karnataka', 'Chennai, Tamil Nadu'][Math.floor(Math.random() * 4)],
-      merchantName: ['Flipkart', 'Paytm', 'PhonePe', 'Amazon India'][Math.floor(Math.random() * 4)]
+      location: ['Mumbai, Maharashtra', 'Delhi NCR', 'Bangalore, Karnataka', 'Chennai, Tamil Nadu', 'Hyderabad, Telangana', 'Pune, Maharashtra', 'Kolkata, West Bengal'][Math.floor(Math.random() * 7)],
+      merchantName: ['Flipkart', 'Paytm Mall', 'BigBasket', 'Amazon India', 'Myntra', 'Swiggy', 'Zomato', 'CRED'][Math.floor(Math.random() * 8)]
     };
   };
 
@@ -75,39 +75,39 @@ const FraudAlertSystem: React.FC = () => {
         type: 'high_risk',
         severity: 'critical',
         title: 'Critical Fraud Alert',
-        description: 'High-value transaction from new device in foreign country',
-        transactionId: 'TXN-ABC123',
-        amount: 8500,
+        description: 'High-value UPI transaction from new device in unusual location',
+        transactionId: 'TXN-MUM78234',
+        amount: 85000,
         timestamp: new Date(Date.now() - 5 * 60 * 1000),
         status: 'active',
-        location: 'Nigeria',
-        merchantName: 'Unknown Merchant'
+        location: 'Mumbai, Maharashtra',
+        merchantName: 'Unknown UPI Merchant'
       },
       {
         id: 'alert-2',
         type: 'velocity_check',
         severity: 'high',
         title: 'Velocity Check Alert',
-        description: '15 transactions in 10 minutes detected',
-        transactionId: 'TXN-DEF456',
-        amount: 250,
+        description: '15 transactions in 10 minutes detected via PhonePe',
+        transactionId: 'TXN-DEL45621',
+        amount: 2500,
         timestamp: new Date(Date.now() - 15 * 60 * 1000),
         status: 'investigating',
-        location: 'California, USA',
-        merchantName: 'Online Gaming'
+        location: 'Delhi NCR',
+        merchantName: 'Dream11 Gaming'
       },
       {
         id: 'alert-3',
         type: 'suspicious_pattern',
         severity: 'medium',
         title: 'Pattern Recognition Alert',
-        description: 'Card testing pattern detected',
-        transactionId: 'TXN-GHI789',
-        amount: 1,
+        description: 'Card testing pattern detected on Razorpay gateway',
+        transactionId: 'TXN-BLR89012',
+        amount: 10,
         timestamp: new Date(Date.now() - 30 * 60 * 1000),
         status: 'resolved',
-        location: 'Texas, USA',
-        merchantName: 'Test Merchant'
+        location: 'Bangalore, Karnataka',
+        merchantName: 'Test Merchant India'
       }
     ];
     setAlerts(initialAlerts);
@@ -268,8 +268,8 @@ const FraudAlertSystem: React.FC = () => {
                   )}
                   {alert.amount && (
                     <span className="flex items-center gap-1">
-                      <DollarSign className="h-3 w-3" />
-                      {alert.amount.toLocaleString()}
+                      <IndianRupee className="h-3 w-3" />
+                      {alert.amount.toLocaleString('en-IN')}
                     </span>
                   )}
                   {alert.location && (

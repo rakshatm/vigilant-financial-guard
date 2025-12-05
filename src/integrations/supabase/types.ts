@@ -14,93 +14,104 @@ export type Database = {
   }
   public: {
     Tables: {
-      customer_approvals: {
+      customer_approvels: {
         Row: {
-          approval_method: string
-          expires_at: string
-          id: string
-          phone_number: string | null
-          responded_at: string | null
-          sent_at: string
-          status: string
-          transaction_id: string
-          user_id: string
-          verification_code: string
-        }
-        Insert: {
-          approval_method: string
-          expires_at?: string
-          id?: string
-          phone_number?: string | null
-          responded_at?: string | null
-          sent_at?: string
-          status?: string
-          transaction_id: string
-          user_id: string
-          verification_code: string
-        }
-        Update: {
-          approval_method?: string
-          expires_at?: string
-          id?: string
-          phone_number?: string | null
-          responded_at?: string | null
-          sent_at?: string
-          status?: string
-          transaction_id?: string
-          user_id?: string
-          verification_code?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "customer_approvals_transaction_id_fkey"
-            columns: ["transaction_id"]
-            isOneToOne: false
-            referencedRelation: "transactions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      fraud_alerts: {
-        Row: {
-          alert_type: string
           created_at: string
-          id: string
-          message: string
-          resolved_at: string | null
-          severity: string
-          status: string
-          transaction_id: string
+          id: number
         }
         Insert: {
-          alert_type: string
           created_at?: string
-          id?: string
-          message: string
-          resolved_at?: string | null
-          severity: string
-          status?: string
-          transaction_id: string
+          id?: number
         }
         Update: {
-          alert_type?: string
           created_at?: string
-          id?: string
-          message?: string
-          resolved_at?: string | null
-          severity?: string
-          status?: string
-          transaction_id?: string
+          id?: number
         }
-        Relationships: [
-          {
-            foreignKeyName: "fraud_alerts_transaction_id_fkey"
-            columns: ["transaction_id"]
-            isOneToOne: false
-            referencedRelation: "transactions"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
+      }
+      "fraud detection": {
+        Row: {
+          Account_Balance: number | null
+          Account_Type: string | null
+          Age: number | null
+          Bank_Branch: string | null
+          City: string | null
+          Customer_Contact: string | null
+          Device_Type: string | null
+          Gender: string | null
+          Is_Fraud: number
+          Merchant_Category: string | null
+          State: string | null
+          Transaction_Amount: number | null
+          Transaction_Currency: string | null
+          Transaction_Date: string | null
+          Transaction_Description: string | null
+          Transaction_Device: string | null
+          Transaction_ID: string | null
+          Transaction_Location: string
+          Transaction_Time: string | null
+          Transaction_Type: string | null
+        }
+        Insert: {
+          Account_Balance?: number | null
+          Account_Type?: string | null
+          Age?: number | null
+          Bank_Branch?: string | null
+          City?: string | null
+          Customer_Contact?: string | null
+          Device_Type?: string | null
+          Gender?: string | null
+          Is_Fraud: number
+          Merchant_Category?: string | null
+          State?: string | null
+          Transaction_Amount?: number | null
+          Transaction_Currency?: string | null
+          Transaction_Date?: string | null
+          Transaction_Description?: string | null
+          Transaction_Device?: string | null
+          Transaction_ID?: string | null
+          Transaction_Location: string
+          Transaction_Time?: string | null
+          Transaction_Type?: string | null
+        }
+        Update: {
+          Account_Balance?: number | null
+          Account_Type?: string | null
+          Age?: number | null
+          Bank_Branch?: string | null
+          City?: string | null
+          Customer_Contact?: string | null
+          Device_Type?: string | null
+          Gender?: string | null
+          Is_Fraud?: number
+          Merchant_Category?: string | null
+          State?: string | null
+          Transaction_Amount?: number | null
+          Transaction_Currency?: string | null
+          Transaction_Date?: string | null
+          Transaction_Description?: string | null
+          Transaction_Device?: string | null
+          Transaction_ID?: string | null
+          Transaction_Location?: string
+          Transaction_Time?: string | null
+          Transaction_Type?: string | null
+        }
+        Relationships: []
+      }
+      fraud_alert: {
+        Row: {
+          created_at: string
+          id: number
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+        }
+        Update: {
+          created_at?: string
+          id?: number
+        }
+        Relationships: []
       }
       model_training_data: {
         Row: {
