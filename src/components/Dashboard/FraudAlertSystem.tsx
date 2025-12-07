@@ -3,10 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertTriangle, Shield, IndianRupee, Clock, X, CheckCircle } from 'lucide-react';
+import { AlertTriangle, Shield, IndianRupee, Clock, X, CheckCircle, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useFraudData, FraudAlert as DBFraudAlert } from '@/hooks/useFraudData';
 
-export interface FraudAlert {
+interface LocalAlert {
   id: string;
   type: 'high_risk' | 'suspicious_pattern' | 'velocity_check' | 'location_anomaly';
   severity: 'critical' | 'high' | 'medium' | 'low';
@@ -18,17 +19,53 @@ export interface FraudAlert {
   status: 'active' | 'investigating' | 'resolved' | 'dismissed';
   location?: string;
   merchantName?: string;
+  isFromDB?: boolean;
 }
 
 const FraudAlertSystem: React.FC = () => {
-  const [alerts, setAlerts] = useState<FraudAlert[]>([]);
+  const [localAlerts, setLocalAlerts] = useState<LocalAlert[]>([]);
   const [filter, setFilter] = useState<'all' | 'active' | 'critical'>('all');
+  const [savingAlertId, setSavingAlertId] = useState<string | null>(null);
   const { toast } = useToast();
+  const { alerts: dbAlerts, createAlert, updateAlertStatus: updateDBAlertStatus, loading } = useFraudData();
 
-  const generateMockAlert = (): FraudAlert => {
+  // Convert DB alerts to local format
+  const convertDBAlert = (dbAlert: DBFraudAlert): LocalAlert => {
+    const typeMap: Record<string, LocalAlert['type']> = {
+      'high_risk': 'high_risk',
+      'suspicious_pattern': 'suspicious_pattern',
+      'velocity_check': 'velocity_check',
+      'location_anomaly': 'location_anomaly'
+    };
+
+    return {
+      id: dbAlert.id,
+      type: typeMap[dbAlert.alert_type] || 'high_risk',
+      severity: dbAlert.severity as LocalAlert['severity'],
+      title: dbAlert.alert_type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      description: dbAlert.message,
+      transactionId: dbAlert.transaction_id,
+      timestamp: new Date(dbAlert.created_at),
+      status: dbAlert.status as LocalAlert['status'],
+      isFromDB: true
+    };
+  };
+
+  // Merge DB alerts with local alerts
+  useEffect(() => {
+    if (dbAlerts.length > 0) {
+      const convertedAlerts = dbAlerts.map(convertDBAlert);
+      setLocalAlerts(prev => {
+        // Filter out local alerts that exist in DB
+        const localOnly = prev.filter(a => !a.isFromDB);
+        return [...convertedAlerts, ...localOnly];
+      });
+    }
+  }, [dbAlerts]);
+
+  const generateMockAlert = (): LocalAlert => {
     const types = ['high_risk', 'suspicious_pattern', 'velocity_check', 'location_anomaly'] as const;
     const severities = ['critical', 'high', 'medium', 'low'] as const;
-    const statuses = ['active', 'investigating', 'resolved'] as const;
     
     const alertTemplates = {
       high_risk: {
@@ -60,67 +97,72 @@ const FraudAlertSystem: React.FC = () => {
       title: template.title,
       description: template.description,
       transactionId: `TXN-${Math.random().toString(36).substr(2, 8).toUpperCase()}`,
-      amount: Math.floor(Math.random() * 10000) + 100,
+      amount: Math.floor(Math.random() * 100000) + 1000,
       timestamp: new Date(),
-      status: statuses[Math.floor(Math.random() * statuses.length)],
+      status: 'active',
       location: ['Mumbai, Maharashtra', 'Delhi NCR', 'Bangalore, Karnataka', 'Chennai, Tamil Nadu', 'Hyderabad, Telangana', 'Pune, Maharashtra', 'Kolkata, West Bengal'][Math.floor(Math.random() * 7)],
-      merchantName: ['Flipkart', 'Paytm Mall', 'BigBasket', 'Amazon India', 'Myntra', 'Swiggy', 'Zomato', 'CRED'][Math.floor(Math.random() * 8)]
+      merchantName: ['Flipkart', 'Paytm Mall', 'BigBasket', 'Amazon India', 'Myntra', 'Swiggy', 'Zomato', 'CRED'][Math.floor(Math.random() * 8)],
+      isFromDB: false
     };
   };
 
-  const initializeAlerts = () => {
-    const initialAlerts: FraudAlert[] = [
-      {
-        id: 'alert-1',
-        type: 'high_risk',
-        severity: 'critical',
-        title: 'Critical Fraud Alert',
-        description: 'High-value UPI transaction from new device in unusual location',
-        transactionId: 'TXN-MUM78234',
-        amount: 85000,
-        timestamp: new Date(Date.now() - 5 * 60 * 1000),
-        status: 'active',
-        location: 'Mumbai, Maharashtra',
-        merchantName: 'Unknown UPI Merchant'
-      },
-      {
-        id: 'alert-2',
-        type: 'velocity_check',
-        severity: 'high',
-        title: 'Velocity Check Alert',
-        description: '15 transactions in 10 minutes detected via PhonePe',
-        transactionId: 'TXN-DEL45621',
-        amount: 2500,
-        timestamp: new Date(Date.now() - 15 * 60 * 1000),
-        status: 'investigating',
-        location: 'Delhi NCR',
-        merchantName: 'Dream11 Gaming'
-      },
-      {
-        id: 'alert-3',
-        type: 'suspicious_pattern',
-        severity: 'medium',
-        title: 'Pattern Recognition Alert',
-        description: 'Card testing pattern detected on Razorpay gateway',
-        transactionId: 'TXN-BLR89012',
-        amount: 10,
-        timestamp: new Date(Date.now() - 30 * 60 * 1000),
-        status: 'resolved',
-        location: 'Bangalore, Karnataka',
-        merchantName: 'Test Merchant India'
-      }
-    ];
-    setAlerts(initialAlerts);
-  };
-
+  // Initialize with some demo alerts if DB is empty
   useEffect(() => {
-    initializeAlerts();
+    if (!loading && dbAlerts.length === 0 && localAlerts.length === 0) {
+      const initialAlerts: LocalAlert[] = [
+        {
+          id: 'alert-demo-1',
+          type: 'high_risk',
+          severity: 'critical',
+          title: 'Critical Fraud Alert',
+          description: 'High-value UPI transaction from new device in unusual location',
+          transactionId: 'TXN-MUM78234',
+          amount: 85000,
+          timestamp: new Date(Date.now() - 5 * 60 * 1000),
+          status: 'active',
+          location: 'Mumbai, Maharashtra',
+          merchantName: 'Unknown UPI Merchant',
+          isFromDB: false
+        },
+        {
+          id: 'alert-demo-2',
+          type: 'velocity_check',
+          severity: 'high',
+          title: 'Velocity Check Alert',
+          description: '15 transactions in 10 minutes detected via PhonePe',
+          transactionId: 'TXN-DEL45621',
+          amount: 2500,
+          timestamp: new Date(Date.now() - 15 * 60 * 1000),
+          status: 'investigating',
+          location: 'Delhi NCR',
+          merchantName: 'Dream11 Gaming',
+          isFromDB: false
+        },
+        {
+          id: 'alert-demo-3',
+          type: 'suspicious_pattern',
+          severity: 'medium',
+          title: 'Pattern Recognition Alert',
+          description: 'Card testing pattern detected on Razorpay gateway',
+          transactionId: 'TXN-BLR89012',
+          amount: 10,
+          timestamp: new Date(Date.now() - 30 * 60 * 1000),
+          status: 'resolved',
+          location: 'Bangalore, Karnataka',
+          merchantName: 'Test Merchant India',
+          isFromDB: false
+        }
+      ];
+      setLocalAlerts(initialAlerts);
+    }
+  }, [loading, dbAlerts.length]);
 
-    // Simulate new alerts every 30-60 seconds
+  // Simulate new alerts periodically
+  useEffect(() => {
     const interval = setInterval(() => {
-      if (Math.random() > 0.7) { // 30% chance of new alert
+      if (Math.random() > 0.8) { // 20% chance of new alert
         const newAlert = generateMockAlert();
-        setAlerts(prev => [newAlert, ...prev].slice(0, 10)); // Keep only latest 10
+        setLocalAlerts(prev => [newAlert, ...prev].slice(0, 15));
         
         if (newAlert.severity === 'critical') {
           toast({
@@ -130,7 +172,7 @@ const FraudAlertSystem: React.FC = () => {
           });
         }
       }
-    }, 45000);
+    }, 60000); // Every 60 seconds
 
     return () => clearInterval(interval);
   }, [toast]);
@@ -161,19 +203,111 @@ const FraudAlertSystem: React.FC = () => {
     }
   };
 
-  const updateAlertStatus = (alertId: string, newStatus: FraudAlert['status']) => {
-    setAlerts(prev => 
-      prev.map(alert => 
-        alert.id === alertId ? { ...alert, status: newStatus } : alert
-      )
-    );
+  const handleUpdateStatus = async (alertId: string, newStatus: LocalAlert['status'], isFromDB?: boolean) => {
+    setSavingAlertId(alertId);
+    
+    try {
+      if (isFromDB) {
+        // Update in database
+        await updateDBAlertStatus(alertId, newStatus);
+        toast({
+          title: "Alert Updated",
+          description: `Alert status changed to ${newStatus}`,
+        });
+      } else {
+        // Update locally and save to database
+        const alert = localAlerts.find(a => a.id === alertId);
+        if (alert) {
+          // Save to database
+          await createAlert({
+            transaction_id: alert.transactionId || 'UNKNOWN',
+            alert_type: alert.type,
+            severity: alert.severity,
+            message: alert.description,
+            status: newStatus
+          });
+          
+          // Remove from local state (it will come back from DB)
+          setLocalAlerts(prev => prev.filter(a => a.id !== alertId));
+          
+          toast({
+            title: "Alert Saved",
+            description: `Alert saved to database with status: ${newStatus}`,
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error updating alert:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update alert status",
+        variant: "destructive"
+      });
+      
+      // Fallback: update locally
+      setLocalAlerts(prev => 
+        prev.map(alert => 
+          alert.id === alertId ? { ...alert, status: newStatus } : alert
+        )
+      );
+    } finally {
+      setSavingAlertId(null);
+    }
   };
 
-  const dismissAlert = (alertId: string) => {
-    setAlerts(prev => prev.filter(alert => alert.id !== alertId));
+  const handleDismiss = async (alertId: string, isFromDB?: boolean) => {
+    setSavingAlertId(alertId);
+    
+    try {
+      if (isFromDB) {
+        await updateDBAlertStatus(alertId, 'dismissed');
+      }
+      setLocalAlerts(prev => prev.filter(alert => alert.id !== alertId));
+      toast({
+        title: "Alert Dismissed",
+        description: "The alert has been dismissed",
+      });
+    } catch (error) {
+      console.error('Error dismissing alert:', error);
+      // Still remove from local state
+      setLocalAlerts(prev => prev.filter(alert => alert.id !== alertId));
+    } finally {
+      setSavingAlertId(null);
+    }
   };
 
-  const filteredAlerts = alerts.filter(alert => {
+  const handleSaveToDatabase = async (alert: LocalAlert) => {
+    setSavingAlertId(alert.id);
+    
+    try {
+      await createAlert({
+        transaction_id: alert.transactionId || 'UNKNOWN',
+        alert_type: alert.type,
+        severity: alert.severity,
+        message: alert.description,
+        status: alert.status
+      });
+      
+      // Mark as saved
+      setLocalAlerts(prev => prev.filter(a => a.id !== alert.id));
+      
+      toast({
+        title: "Alert Saved",
+        description: "Alert has been saved to the database",
+      });
+    } catch (error) {
+      console.error('Error saving alert:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save alert to database",
+        variant: "destructive"
+      });
+    } finally {
+      setSavingAlertId(null);
+    }
+  };
+
+  const filteredAlerts = localAlerts.filter(alert => {
     if (filter === 'all') return true;
     if (filter === 'active') return alert.status === 'active';
     if (filter === 'critical') return alert.severity === 'critical';
@@ -199,6 +333,7 @@ const FraudAlertSystem: React.FC = () => {
           <CardTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-red-500" />
             Fraud Alert System
+            {loading && <Loader2 className="h-4 w-4 animate-spin" />}
           </CardTitle>
           <div className="flex gap-2">
             <Button 
@@ -237,7 +372,9 @@ const FraudAlertSystem: React.FC = () => {
           filteredAlerts.map((alert) => (
             <div 
               key={alert.id}
-              className="border rounded-lg p-4 space-y-3 animate-fade-in hover:shadow-md transition-shadow"
+              className={`border rounded-lg p-4 space-y-3 animate-fade-in hover:shadow-md transition-shadow ${
+                alert.isFromDB ? 'border-primary/30 bg-primary/5' : ''
+              }`}
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
@@ -245,7 +382,14 @@ const FraudAlertSystem: React.FC = () => {
                     {getSeverityIcon(alert.severity)}
                   </div>
                   <div>
-                    <h4 className="font-medium text-sm">{alert.title}</h4>
+                    <h4 className="font-medium text-sm flex items-center gap-2">
+                      {alert.title}
+                      {alert.isFromDB && (
+                        <Badge variant="outline" className="text-xs bg-primary/10">
+                          Saved
+                        </Badge>
+                      )}
+                    </h4>
                     <p className="text-sm text-muted-foreground">{alert.description}</p>
                   </div>
                 </div>
@@ -254,9 +398,14 @@ const FraudAlertSystem: React.FC = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => dismissAlert(alert.id)}
+                    onClick={() => handleDismiss(alert.id, alert.isFromDB)}
+                    disabled={savingAlertId === alert.id}
                   >
-                    <X className="h-4 w-4" />
+                    {savingAlertId === alert.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <X className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
               </div>
@@ -293,24 +442,41 @@ const FraudAlertSystem: React.FC = () => {
                   {alert.status.toUpperCase()}
                 </Badge>
                 
-                {alert.status === 'active' && (
-                  <div className="ml-auto flex gap-2">
+                <div className="ml-auto flex gap-2">
+                  {!alert.isFromDB && (
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => updateAlertStatus(alert.id, 'investigating')}
+                      onClick={() => handleSaveToDatabase(alert)}
+                      disabled={savingAlertId === alert.id}
                     >
-                      Investigate
+                      {savingAlertId === alert.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                      ) : null}
+                      Save
                     </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => updateAlertStatus(alert.id, 'resolved')}
-                    >
-                      Resolve
-                    </Button>
-                  </div>
-                )}
+                  )}
+                  {alert.status === 'active' && (
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleUpdateStatus(alert.id, 'investigating', alert.isFromDB)}
+                        disabled={savingAlertId === alert.id}
+                      >
+                        Investigate
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleUpdateStatus(alert.id, 'resolved', alert.isFromDB)}
+                        disabled={savingAlertId === alert.id}
+                      >
+                        Resolve
+                      </Button>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           ))

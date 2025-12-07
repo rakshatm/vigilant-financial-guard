@@ -21,7 +21,7 @@ export interface FraudAlert {
   alert_type: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
   message: string;
-  status: 'active' | 'resolved' | 'dismissed';
+  status: 'active' | 'resolved' | 'dismissed' | 'investigating';
   created_at: string;
 }
 
