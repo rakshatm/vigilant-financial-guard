@@ -106,18 +106,53 @@ export const useFraudData = () => {
     }
   };
 
-  // Fetch fraud alerts - using fraud_alert table (note: table has minimal structure)
+  // Fetch fraud alerts from the new fraud_alerts table
   const fetchAlerts = async () => {
     if (!user) return;
 
     try {
-      // The fraud_alert table only has id and created_at columns
-      // For now, we'll return an empty array as alerts are generated in the FraudAlertSystem component
-      setAlerts([]);
+      const { data, error } = await supabase
+        .from('fraud_alerts')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setAlerts((data || []) as FraudAlert[]);
     } catch (err) {
       console.error('Error fetching alerts:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch alerts');
     }
+  };
+
+  // Create a new fraud alert
+  const createAlert = async (alertData: Omit<FraudAlert, 'id' | 'created_at'>) => {
+    if (!user) throw new Error('User not authenticated');
+
+    const { data, error } = await supabase
+      .from('fraud_alerts')
+      .insert([{
+        ...alertData,
+        user_id: user.id
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+    await fetchAlerts();
+    return data;
+  };
+
+  // Update alert status
+  const updateAlertStatus = async (alertId: string, status: FraudAlert['status']) => {
+    const { error } = await supabase
+      .from('fraud_alerts')
+      .update({ status })
+      .eq('id', alertId)
+      .eq('user_id', user?.id);
+
+    if (error) throw error;
+    await fetchAlerts();
   };
 
   // Calculate metrics
@@ -233,6 +268,8 @@ export const useFraudData = () => {
     error,
     refreshData: loadData,
     createTransaction,
-    updateTransactionStatus
+    updateTransactionStatus,
+    createAlert,
+    updateAlertStatus
   };
 };
