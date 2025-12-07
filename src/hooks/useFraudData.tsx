@@ -42,20 +42,64 @@ export const useFraudData = () => {
   const [error, setError] = useState<string | null>(null);
   const { user } = useSupabaseAuth();
 
-  // Fetch transactions
+  // Fetch transactions from fraud detection table
   const fetchTransactions = async () => {
     if (!user) return;
 
     try {
       const { data, error } = await supabase
-        .from('transactions')
+        .from('fraud detection')
         .select('*')
-        .eq('user_id', user.id)
-        .order('timestamp', { ascending: false })
         .limit(50);
 
       if (error) throw error;
-      setTransactions((data || []) as Transaction[]);
+      
+      // Map fraud detection data to Transaction interface
+      const mappedTransactions: Transaction[] = (data || []).map((item: any, index: number) => {
+        const isFraud = item.Is_Fraud === 1;
+        const amount = item.Transaction_Amount || 0;
+        
+        // Determine risk level based on Is_Fraud and amount
+        let riskLevel: 'low' | 'medium' | 'high' | 'critical' = 'low';
+        let fraudScore = 0;
+        
+        if (isFraud) {
+          if (amount > 50000) {
+            riskLevel = 'critical';
+            fraudScore = 0.95;
+          } else if (amount > 20000) {
+            riskLevel = 'high';
+            fraudScore = 0.8;
+          } else {
+            riskLevel = 'medium';
+            fraudScore = 0.6;
+          }
+        } else {
+          fraudScore = Math.random() * 0.3; // Low fraud score for legitimate transactions
+        }
+        
+        // Determine status based on Is_Fraud
+        const status: 'pending' | 'approved' | 'blocked' | 'flagged' = isFraud 
+          ? (amount > 30000 ? 'blocked' : 'flagged')
+          : 'approved';
+
+        return {
+          id: `fd-${index}-${item.Transaction_ID || index}`,
+          transaction_id: item.Transaction_ID || `TXN-${index}`,
+          amount: amount,
+          merchant: item.Transaction_Description || item.Merchant_Category || 'Unknown',
+          category: item.Merchant_Category || 'General',
+          location: item.Transaction_Location || `${item.City || ''}, ${item.State || ''}`.trim() || 'Unknown',
+          timestamp: item.Transaction_Date && item.Transaction_Time 
+            ? `${item.Transaction_Date} ${item.Transaction_Time}` 
+            : new Date().toISOString(),
+          status,
+          fraud_score: fraudScore,
+          risk_level: riskLevel
+        };
+      });
+      
+      setTransactions(mappedTransactions);
     } catch (err) {
       console.error('Error fetching transactions:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch transactions');
