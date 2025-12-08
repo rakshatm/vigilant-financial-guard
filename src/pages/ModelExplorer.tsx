@@ -9,11 +9,11 @@ import { PieChart, Pie, Cell, BarChart, Bar, LineChart, Line, XAxis, YAxis, Cart
 const ModelExplorer = () => {
   // Model performance data
   const performanceMetrics = {
-    accuracy: 0.945,
-    precision: 0.92,
-    recall: 0.89,
-    f1Score: 0.905,
-    auc: 0.963
+    accuracy: 0.9709471467123018,
+    precision: 0.9999720490818124,
+    recall: 0.9419198567742615,
+    f1Score: 0.9700782277416993,
+    auc: 0.9743205531118764
   };
 
   // Feature importance chart data
