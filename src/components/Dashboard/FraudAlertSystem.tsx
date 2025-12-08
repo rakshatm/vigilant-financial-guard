@@ -45,21 +45,20 @@ const FraudAlertSystem: React.FC = () => {
       title: dbAlert.alert_type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
       description: dbAlert.message,
       transactionId: dbAlert.transaction_id,
+      amount: dbAlert.amount,
+      location: dbAlert.location,
+      merchantName: dbAlert.merchant,
       timestamp: new Date(dbAlert.created_at),
       status: dbAlert.status as LocalAlert['status'],
-      isFromDB: true
+      isFromDB: dbAlert.isFromDB
     };
   };
 
-  // Merge DB alerts with local alerts
+  // Merge DB/fraud detection alerts with local alerts
   useEffect(() => {
     if (dbAlerts.length > 0) {
       const convertedAlerts = dbAlerts.map(convertDBAlert);
-      setLocalAlerts(prev => {
-        // Filter out local alerts that exist in DB
-        const localOnly = prev.filter(a => !a.isFromDB);
-        return [...convertedAlerts, ...localOnly];
-      });
+      setLocalAlerts(convertedAlerts);
     }
   }, [dbAlerts]);
 
@@ -106,87 +105,29 @@ const FraudAlertSystem: React.FC = () => {
     };
   };
 
-  // Initialize with demo alerts for demonstration
+  // Merge DB/fraud detection alerts with any remaining local demo alerts
   useEffect(() => {
-    if (!loading && localAlerts.filter(a => !a.isFromDB).length === 0) {
-      const initialAlerts: LocalAlert[] = [
+    if (!loading && dbAlerts.length === 0 && localAlerts.length === 0) {
+      // Only show demo alerts if no real data is available
+      const demoAlerts: LocalAlert[] = [
         {
           id: 'alert-demo-1',
           type: 'high_risk',
           severity: 'critical',
           title: 'Critical Fraud Alert',
           description: 'High-value UPI transaction from new device in unusual location',
-          transactionId: 'TXN-MUM78234',
+          transactionId: 'TXN-DEMO-001',
           amount: 85000,
           timestamp: new Date(Date.now() - 5 * 60 * 1000),
           status: 'active',
           location: 'Mumbai, Maharashtra',
           merchantName: 'Unknown UPI Merchant',
           isFromDB: false
-        },
-        {
-          id: 'alert-demo-2',
-          type: 'velocity_check',
-          severity: 'high',
-          title: 'Velocity Check Alert',
-          description: '15 transactions in 10 minutes detected via PhonePe',
-          transactionId: 'TXN-DEL45621',
-          amount: 2500,
-          timestamp: new Date(Date.now() - 15 * 60 * 1000),
-          status: 'investigating',
-          location: 'Delhi NCR',
-          merchantName: 'Dream11 Gaming',
-          isFromDB: false
-        },
-        {
-          id: 'alert-demo-3',
-          type: 'suspicious_pattern',
-          severity: 'medium',
-          title: 'Pattern Recognition Alert',
-          description: 'Card testing pattern detected on Razorpay gateway',
-          transactionId: 'TXN-BLR89012',
-          amount: 10,
-          timestamp: new Date(Date.now() - 30 * 60 * 1000),
-          status: 'active',
-          location: 'Bangalore, Karnataka',
-          merchantName: 'Test Merchant India',
-          isFromDB: false
-        },
-        {
-          id: 'alert-demo-4',
-          type: 'location_anomaly',
-          severity: 'critical',
-          title: 'Location Anomaly',
-          description: 'Transaction from unusual geographic location - possible account takeover',
-          transactionId: 'TXN-HYD56789',
-          amount: 125000,
-          timestamp: new Date(Date.now() - 45 * 60 * 1000),
-          status: 'active',
-          location: 'Hyderabad, Telangana',
-          merchantName: 'International Wire Transfer',
-          isFromDB: false
-        },
-        {
-          id: 'alert-demo-5',
-          type: 'high_risk',
-          severity: 'high',
-          title: 'High-Risk Transaction',
-          description: 'Multiple high-value transactions to new beneficiary accounts',
-          transactionId: 'TXN-CHN34567',
-          amount: 50000,
-          timestamp: new Date(Date.now() - 60 * 60 * 1000),
-          status: 'active',
-          location: 'Chennai, Tamil Nadu',
-          merchantName: 'Crypto Exchange',
-          isFromDB: false
         }
       ];
-      setLocalAlerts(prev => {
-        const dbOnly = prev.filter(a => a.isFromDB);
-        return [...dbOnly, ...initialAlerts];
-      });
+      setLocalAlerts(demoAlerts);
     }
-  }, [loading]);
+  }, [loading, dbAlerts.length]);
 
   // Simulate new alerts periodically
   useEffect(() => {
