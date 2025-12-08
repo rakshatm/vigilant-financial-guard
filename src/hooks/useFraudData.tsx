@@ -23,12 +23,6 @@ export interface FraudAlert {
   message: string;
   status: 'active' | 'resolved' | 'dismissed' | 'investigating';
   created_at: string;
-  // Extended fields from fraud detection table
-  amount?: number;
-  location?: string;
-  merchant?: string;
-  device_type?: string;
-  isFromDB?: boolean;
 }
 
 export interface FraudMetrics {
@@ -43,13 +37,12 @@ export interface FraudMetrics {
 export const useFraudData = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [alerts, setAlerts] = useState<FraudAlert[]>([]);
-  const [fraudDetectionAlerts, setFraudDetectionAlerts] = useState<FraudAlert[]>([]);
   const [metrics, setMetrics] = useState<FraudMetrics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useSupabaseAuth();
 
-  // Fetch transactions from fraud detection table and generate alerts for fraudulent ones
+  // Fetch transactions from fraud detection table
   const fetchTransactions = async () => {
     if (!user) return;
 
@@ -57,11 +50,9 @@ export const useFraudData = () => {
       const { data, error } = await supabase
         .from('fraud detection')
         .select('*')
-        .limit(100);
+        .limit(50);
 
       if (error) throw error;
-      
-      const generatedAlerts: FraudAlert[] = [];
       
       // Map fraud detection data to Transaction interface
       const mappedTransactions: Transaction[] = (data || []).map((item: any, index: number) => {
@@ -71,54 +62,18 @@ export const useFraudData = () => {
         // Determine risk level based on Is_Fraud and amount
         let riskLevel: 'low' | 'medium' | 'high' | 'critical' = 'low';
         let fraudScore = 0;
-        let severity: 'low' | 'medium' | 'high' | 'critical' = 'low';
         
         if (isFraud) {
           if (amount > 50000) {
             riskLevel = 'critical';
-            severity = 'critical';
             fraudScore = 0.95;
           } else if (amount > 20000) {
             riskLevel = 'high';
-            severity = 'high';
             fraudScore = 0.8;
-          } else if (amount > 10000) {
-            riskLevel = 'medium';
-            severity = 'medium';
-            fraudScore = 0.6;
           } else {
             riskLevel = 'medium';
-            severity = 'low';
-            fraudScore = 0.5;
+            fraudScore = 0.6;
           }
-          
-          // Generate alert for fraudulent transactions
-          const alertTypes = ['high_risk', 'suspicious_pattern', 'velocity_check', 'location_anomaly'];
-          const alertType = alertTypes[index % alertTypes.length];
-          
-          const alertMessages: Record<string, string> = {
-            'high_risk': `High-risk ${item.Transaction_Type || 'transaction'} detected - ₹${amount.toLocaleString('en-IN')}`,
-            'suspicious_pattern': `Suspicious ${item.Merchant_Category || 'merchant'} transaction pattern detected`,
-            'velocity_check': `Unusual transaction frequency from ${item.Device_Type || 'device'}`,
-            'location_anomaly': `Transaction from unusual location: ${item.Transaction_Location || 'Unknown'}`
-          };
-          
-          generatedAlerts.push({
-            id: `fraud-${item.Transaction_ID || index}`,
-            transaction_id: item.Transaction_ID || `TXN-${index}`,
-            alert_type: alertType,
-            severity: severity,
-            message: alertMessages[alertType],
-            status: 'active',
-            created_at: item.Transaction_Date && item.Transaction_Time 
-              ? `${item.Transaction_Date} ${item.Transaction_Time}` 
-              : new Date().toISOString(),
-            amount: amount,
-            location: item.Transaction_Location || `${item.City || ''}, ${item.State || ''}`.trim() || 'Unknown',
-            merchant: item.Transaction_Description || item.Merchant_Category || 'Unknown Merchant',
-            device_type: item.Device_Type || item.Transaction_Device || 'Unknown',
-            isFromDB: false
-          });
         } else {
           fraudScore = Math.random() * 0.3; // Low fraud score for legitimate transactions
         }
@@ -145,7 +100,6 @@ export const useFraudData = () => {
       });
       
       setTransactions(mappedTransactions);
-      setFraudDetectionAlerts(generatedAlerts);
     } catch (err) {
       console.error('Error fetching transactions:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch transactions');
@@ -365,12 +319,9 @@ export const useFraudData = () => {
     await fetchTransactions();
   };
 
-  // Combine DB alerts with fraud detection generated alerts
-  const allAlerts = [...alerts.map(a => ({ ...a, isFromDB: true })), ...fraudDetectionAlerts];
-
   return {
     transactions,
-    alerts: allAlerts,
+    alerts,
     metrics,
     loading,
     error,
