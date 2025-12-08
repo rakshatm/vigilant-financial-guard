@@ -106,9 +106,9 @@ const FraudAlertSystem: React.FC = () => {
     };
   };
 
-  // Initialize with some demo alerts if DB is empty
+  // Initialize with demo alerts for demonstration
   useEffect(() => {
-    if (!loading && dbAlerts.length === 0 && localAlerts.length === 0) {
+    if (!loading && localAlerts.filter(a => !a.isFromDB).length === 0) {
       const initialAlerts: LocalAlert[] = [
         {
           id: 'alert-demo-1',
@@ -147,15 +147,46 @@ const FraudAlertSystem: React.FC = () => {
           transactionId: 'TXN-BLR89012',
           amount: 10,
           timestamp: new Date(Date.now() - 30 * 60 * 1000),
-          status: 'resolved',
+          status: 'active',
           location: 'Bangalore, Karnataka',
           merchantName: 'Test Merchant India',
           isFromDB: false
+        },
+        {
+          id: 'alert-demo-4',
+          type: 'location_anomaly',
+          severity: 'critical',
+          title: 'Location Anomaly',
+          description: 'Transaction from unusual geographic location - possible account takeover',
+          transactionId: 'TXN-HYD56789',
+          amount: 125000,
+          timestamp: new Date(Date.now() - 45 * 60 * 1000),
+          status: 'active',
+          location: 'Hyderabad, Telangana',
+          merchantName: 'International Wire Transfer',
+          isFromDB: false
+        },
+        {
+          id: 'alert-demo-5',
+          type: 'high_risk',
+          severity: 'high',
+          title: 'High-Risk Transaction',
+          description: 'Multiple high-value transactions to new beneficiary accounts',
+          transactionId: 'TXN-CHN34567',
+          amount: 50000,
+          timestamp: new Date(Date.now() - 60 * 60 * 1000),
+          status: 'active',
+          location: 'Chennai, Tamil Nadu',
+          merchantName: 'Crypto Exchange',
+          isFromDB: false
         }
       ];
-      setLocalAlerts(initialAlerts);
+      setLocalAlerts(prev => {
+        const dbOnly = prev.filter(a => a.isFromDB);
+        return [...dbOnly, ...initialAlerts];
+      });
     }
-  }, [loading, dbAlerts.length]);
+  }, [loading]);
 
   // Simulate new alerts periodically
   useEffect(() => {
