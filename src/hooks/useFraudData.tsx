@@ -225,6 +225,65 @@ export const useFraudData = () => {
     }
   }, [user]);
 
+  // Subscribe to real-time fraud alerts
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('fraud-alerts-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'fraud_alerts',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('New fraud alert received:', payload);
+          const newAlert = payload.new as FraudAlert;
+          setAlerts(prev => [newAlert, ...prev]);
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'fraud_alerts',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('Fraud alert updated:', payload);
+          const updatedAlert = payload.new as FraudAlert;
+          setAlerts(prev => 
+            prev.map(alert => 
+              alert.id === updatedAlert.id ? updatedAlert : alert
+            )
+          );
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'fraud_alerts',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('Fraud alert deleted:', payload);
+          const deletedAlert = payload.old as FraudAlert;
+          setAlerts(prev => prev.filter(alert => alert.id !== deletedAlert.id));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
   // Create a new transaction
   const createTransaction = async (transactionData: Omit<Transaction, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
     if (!user) throw new Error('User not authenticated');
